@@ -43,10 +43,6 @@ comp_main.use(bodyParser.urlencoded({ extended: false }));
 // competition_main is the object to be exported. export this in index.ts
 export const competition_main = functions.https.onRequest(comp_main);
 
-//Define keys for database collections
-const USERS_KEY = 'Users'
-const SYSPREF_KEY = 'SystemPreferences'
-
 //Setup the Sending Email Control
 const transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -68,7 +64,7 @@ comp_app.use(firestoreTools.validateFirebaseIdToken);
  */
 comp_app.post('/save-semester-points', (req, res) => {
 	//Get user
-	db.collection(USERS_KEY).doc(req["user"]["user_id"]).get()
+	db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).get()
 	.then(async userDocument => {
 		if(userDocument.exists ){
 			//User exists, then make sure that permission is 2, REC/REA
@@ -78,7 +74,7 @@ comp_app.post('/save-semester-points', (req, res) => {
 				//Generate random key, save it to the house system and create a link 
 				const secretKey = randomString(50);
 				const path = "https://"+req.hostname+"/competition/secret-semester-points-set?code="+secretKey;
-				await db.collection(SYSPREF_KEY).doc("Preferences").update({OneTimeCode: secretKey});
+				await db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).doc("Preferences").update({OneTimeCode: secretKey});
 
 				//Set the mail options
 				const mailOptions = {
@@ -124,7 +120,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 	}
 
 	//Get user id. Check the house. Get the rank of the user
-	db.collection("SystemPreferences").doc("Preferences").get()
+	db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).doc("Preferences").get()
 	.then(preferenceDocument =>{
 	//Check that the house is enabled and that the codes match
 	if(preferenceDocument.data()!.isHouseEnabled){
@@ -162,7 +158,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 					}
 					
 				}
-				const usersRef =  db.collection(USERS_KEY);
+				const usersRef =  db.collection(HouseCompetition.USERS_KEY);
 
 				//Iterate through the residents in batches 
 				usersRef.get().then(async listOfUserSnapshots =>{
@@ -175,8 +171,8 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 					while( i < count){
 
 						//add an update to the user for the batch job
-						const ref = db.collection(USERS_KEY).doc(listOfUserSnapshots.docs[i].id)
-						const user = User.fromDocument(listOfUserSnapshots.docs[i])
+						const ref = db.collection(HouseCompetition.USERS_KEY).doc(listOfUserSnapshots.docs[i].id)
+						const user = User.fromQueryDocumentSnapshot(listOfUserSnapshots.docs[i])
 						let userNewPointsSinceDate:number = 0
 						if(user.house != null && user.house !== "" && usersByHouse[user.house.toString()] != null && usersByHouse[user.house.toString()][user.id.toString()] != null){
 							userNewPointsSinceDate = usersByHouse[user.house.toString()][user.id.toString()].points
@@ -191,7 +187,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 						}
 					}
 					//Reset the OneTimeCode on the server
-					batch.update(db.collection(SYSPREF_KEY).doc("Preferences"),{OneTimeCode: randomString(50)});
+					batch.update(db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).doc("Preferences"),{OneTimeCode: randomString(50)});
 					await batch.commit()
 					//Post completion html/ message
 					res.status(200).send("Complete");
@@ -213,7 +209,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
  */
 comp_app.post('/reset-house-competition', (req, res) => {
 	//Get user id. Check the house. Get the rank of the user
-	db.collection(USERS_KEY).doc(req["user"]["user_id"]).get()
+	db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).get()
 	.then(async userDocument => {
 		if(userDocument.exists ){
 			const permissionLevel = userDocument.data()!["Permission Level"];
@@ -221,7 +217,7 @@ comp_app.post('/reset-house-competition', (req, res) => {
 				const secretKey = randomString(50);
 				const path = "https://"+req.hostname+"/competition/secret-reset-house-competition?code="+secretKey;
 				
-				await db.collection(SYSPREF_KEY).doc("Preferences").update({OneTimeCode: secretKey});
+				await db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).doc("Preferences").update({OneTimeCode: secretKey});
 				const mailOptions = {
 					from: 'Purdue HCR Contact <purduehcrcontact@gmail.com',
 					to: req["user"]["email"],
@@ -253,7 +249,7 @@ comp_app.post('/reset-house-competition', (req, res) => {
  * Get request; the button in the reset house competition email will call this function
  */
 comp_app.get('/secret-reset-house-competition', (req,res) => {
-	db.collection("SystemPreferences").doc("Preferences").get()
+	db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).doc("Preferences").get()
 				.then(preferenceDocument =>{
 					//Check that the house competition is still disabled
 					if(preferenceDocument.data()!.isHouseEnabled){
@@ -271,7 +267,7 @@ comp_app.get('/secret-reset-house-competition', (req,res) => {
 })
 
 comp_app.get('/getPointTypes', (req, res) => {
-	db.collection("PointTypes").get().then(pointTypeListSnapshot => {
+	db.collection(HouseCompetition.POINT_TYPES_KEY).get().then(pointTypeListSnapshot => {
 		const pointTypeList: PointType[] = []
 		for ( const pointTypeDocument of pointTypeListSnapshot.docs){
 			pointTypeList.push(new PointType(pointTypeDocument));
@@ -280,6 +276,20 @@ comp_app.get('/getPointTypes', (req, res) => {
 	}).catch(err =>{
 		res.status(400).send(""+err.message);
 	})
+})
+
+/**
+ * Return the system preferences
+ */
+comp_app.get('/getSystemPreferences', (req, res) => {
+	//TODO 
+	/*
+		2. Get the system preferences from the database
+		3. Cast the returned document into a System Preference Model
+		4. Send the json version of the model in the response
+		5. return 400 error if could not find the system preferences
+		6. Return 500 error if firebase error
+	*/
 })
 
 

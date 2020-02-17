@@ -4,6 +4,7 @@ import * as express from 'express';
 import * as bodyParser from "body-parser";
 import { HouseCode } from './models/Housecode';
 import {User} from './models/User';
+import { HouseCompetition } from './models/HouseCompetition';
 
 if(admin.apps.length === 0){
 	admin.initializeApp(functions.config().firebase);
@@ -146,4 +147,19 @@ users_app.post('/create', (req, res) => {
 		})
 	}
 	
+})
+
+/**
+ * Return the user model for the firebase account noted in Authorization header
+ */
+users_app.get('/getUser', (req, res) => {
+	//TODO 
+	/*
+		1. Get the user id from req["user"]["user_id"]
+		2. Get the user from the databse with that id
+		3. Cast the returned document into a User Model
+		4. Send the json version of the model in the response
+		5. return 400 error if could not find the user
+		6. Return 500 error if firebase error
+	*/
 })

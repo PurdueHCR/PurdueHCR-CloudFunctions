@@ -35,7 +35,12 @@ export class User {
         return new User(firstName,code.floorId, code.house, lastName, 0, code.permissionLevel, 0, id)
     } 
 
-    static fromDocument(document: FirebaseFirestore.QueryDocumentSnapshot){
+    /**
+     * This method takes a document that you get by retrieving a collection and turns it into a user model.
+     * 
+     * @param document Document from iterating through a collection
+     */
+    static fromQueryDocumentSnapshot(document: FirebaseFirestore.QueryDocumentSnapshot){
         let firstName: String
         let floorId: String
         let house: String
@@ -92,6 +97,76 @@ export class User {
         
         if( User.TOTAL_POINTS in document.data()){
             totalPoints = document.data()[User.TOTAL_POINTS];
+        }
+        else{
+            totalPoints = -1;
+        }
+        return new User(firstName,floorId,house,lastName
+            ,lastSemesterPoints,permissionLevel,totalPoints,id)
+    }
+
+    /**
+     * This method takes a document that you have after you call .get() on a document but not a collection
+     * 
+     * @param document Document retrived 
+     */
+    static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot){
+        let firstName: String
+        let floorId: String
+        let house: String
+        let lastName: String
+        let lastSemesterPoints: number
+        let permissionLevel: number
+        let totalPoints: number
+        let id: String
+
+        id = document.id;
+
+
+        if( User.FIRST_NAME in document.data){
+            firstName = document.data[User.FIRST_NAME];
+        }
+        else{
+            firstName = "";
+        }
+        
+        if( User.FLOOR_ID in document.data){
+            floorId = document.data[User.FLOOR_ID];
+        }
+        else{
+            floorId = "";
+        }
+
+        if( User.HOUSE in document.data){
+            house = document.data[User.HOUSE];
+        }
+        else{
+            house = "";
+        }
+        
+        if( User.LAST_NAME in document.data){
+            lastName = document.data[User.LAST_NAME];
+        }
+        else{
+            lastName = "";
+        }
+        
+        if( User.LAST_SEMESTER_POINTS in document.data){
+            lastSemesterPoints = document.data[User.LAST_SEMESTER_POINTS];
+        }
+        else{
+            lastSemesterPoints = -1;
+        }
+
+        if( User.PERMISSION_LEVEL in document.data){
+            permissionLevel = document.data[User.PERMISSION_LEVEL];
+        }
+        else{
+            permissionLevel = -1;
+        }
+        
+        if( User.TOTAL_POINTS in document.data){
+            totalPoints = document.data[User.TOTAL_POINTS];
         }
         else{
             totalPoints = -1;

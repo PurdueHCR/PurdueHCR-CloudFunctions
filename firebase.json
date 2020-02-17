@@ -26,6 +26,10 @@
             "destination": "competition"
         },
         {
+            "source": "/link/**",
+            "destination": "link"
+        },
+        {
             "source":"/swagger-ui/**",
             "headers": [{
                 "key" : "Cache-Control",
