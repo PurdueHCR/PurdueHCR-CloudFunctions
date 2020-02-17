@@ -294,6 +294,35 @@ comp_app.get('/getSystemPreferences', (req, res) => {
 
 
 /**
+ * competition/getPointTypes => retrieves the list of point types available to the user and sends them back
+ * 
+ */
+
+// Put code for /getPointTypes below
+
+// Put code for /getPointTypes above
+
+
+/**
+ * competition/getHouses => retrieves the list of houses and sends them back
+ * 
+ */
+
+// Put code for /getHouses below
+
+// Put code for /getHouses above
+
+/**
+ * competition/getRewards => retrieves the list of rewards and sends them back
+ * 
+ */
+
+// Put code for /getRewards below
+
+// Put code for /getRewards above
+
+
+/**
  * Generate a random string
  * 
  * @param length length of the string
