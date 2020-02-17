@@ -83,7 +83,7 @@ admin_app.get('/json_backup', (req, res) => {
             .then(async linkDocuments =>{
                 let lIterator = 0;
                 while(lIterator < linkDocuments.docs.length){
-                    houseCompetition.links.push(new Link((linkDocuments.docs[lIterator])));
+                    houseCompetition.links.push(Link.fromQuerySnapshotDocument((linkDocuments.docs[lIterator])));
                     lIterator++;
                 }
                 db.collection(HouseCompetition.POINT_TYPES_KEY).get()
@@ -111,7 +111,7 @@ admin_app.get('/json_backup', (req, res) => {
                             .then(async userDocuments =>{
                                 let uIterator = 0;
                                 while(uIterator < userDocuments.docs.length){
-                                    houseCompetition.users.push(User.fromDocument((userDocuments.docs[uIterator])));
+                                    houseCompetition.users.push(User.fromQueryDocumentSnapshot((userDocuments.docs[uIterator])));
                                     uIterator++;
                                 }
                                 res.status(200).send(JSON.stringify(houseCompetition));

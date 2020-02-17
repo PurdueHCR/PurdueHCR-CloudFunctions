@@ -2,6 +2,8 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
 import * as bodyParser from "body-parser";
+//import { HouseCompetition } from './models/HouseCompetition';
+import {Link} from './models/Link';
 
 
 if(admin.apps.length === 0){
@@ -37,4 +39,6 @@ links_main.get('/getLink', (req, res) => {
         5. On unable to find, send 400
         6. On server error, send 500
     */
+
+
 })

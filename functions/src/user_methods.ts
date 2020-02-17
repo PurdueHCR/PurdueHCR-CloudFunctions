@@ -22,10 +22,6 @@ const firestoreTools = require('./firestoreTools');
 
 export const user_main = functions.https.onRequest(users_main);
 
-//const houses = 'House';
-const users = 'Users'
-const houseCodes = 'HouseCodes'
-
 
 users_app.use(cors({origin:true}));
 users_app.use(firestoreTools.validateFirebaseIdToken);
@@ -37,11 +33,11 @@ users_app.get('/rank',  (req,res) => {
 	if(userId === "" || userId === undefined){
 		res.status(401).send("Missing Authorization");
 	}
-	db.collection(users).doc(userId!).get()
+	db.collection(HouseCompetition.USERS_KEY).doc(userId!).get()
 	.then(userDocument => {
 		if(userDocument.exists ){
 			const houseName = userDocument.data()!.House;
-			db.collection(users)
+			db.collection(HouseCompetition.USERS_KEY)
 			.where('House', '==', houseName)
 				.get()
 				.then(snapshot => {
@@ -66,11 +62,11 @@ users_app.get('/rank',  (req,res) => {
 
 users_app.get('/auth-rank',  (req, res) => {
 	//Get user id. Check the house. Get the rank of the user
-	db.collection(users).doc(req["user"]["user_id"]).get()
+	db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).get()
 	.then(userDocument => {
 		if(userDocument.exists ){
 			const houseName = userDocument.data()!.House;
-			db.collection(users)
+			db.collection(HouseCompetition.USERS_KEY)
 			.where('House', '==', houseName)
 				.get()
 				.then(snapshot => {
@@ -113,19 +109,19 @@ users_app.post('/create', (req, res) => {
 		res.status(422).send("Missing required parameters")
 	}
 	else{
-		db.collection(users).doc(req["user"]["user_id"]).get().then(userDocument => {
+		db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).get().then(userDocument => {
 			if(userDocument.exists){
 				res.status(421).send("User already exists")
 			}
 			else{
-				db.collection(houseCodes).get().then(houseCodeDocs => {
+				db.collection(HouseCompetition.HOUSE_CODES_KEY).get().then(houseCodeDocs => {
 					let found = false
 					for( const codeDoc of houseCodeDocs.docs){
 						if(codeDoc.data()["Code"] === req.query.code){
 							found = true
 							const code = new HouseCode(codeDoc)
 							const user = User.fromCode(req.query.first,  req.query.last, req["user"]["user_id"], code)
-								db.collection(users).doc(req["user"]["user_id"]).set(user.toJson()).then(ref =>{
+								db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).set(user.toJson()).then(ref =>{
 									res.status(200).send(user.toJson())
 								}	
 							)

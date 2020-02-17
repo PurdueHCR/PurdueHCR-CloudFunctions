@@ -1,9 +1,0 @@
-[1m[36mi  emulators:[39m[22m Starting emulators: functions
-[1m[33m⚠ [39m[22m Your requested "node" version "8" doesn't match your global version "13"
-[1m[32m✔  functions:[39m[22m Emulator started at [1m[4mhttp://localhost:5001[24m[22m
-[1m[36mi  functions:[39m[22m Watching "/Users/brian/Documents/School/RHP_Files/PurdueHCR/PurdueHCR-CloudFunctions/functions" for Cloud Functions...
-[1m[33m⚠  functions:[39m[22m The Cloud Firestore emulator is not running, so calls to Firestore will affect production.
-[1m[32m✔  functions[user]:[39m[22m [1mhttp[22m function initialized (http://localhost:5001/purdue-hcr-test/us-central1/user).
-[1m[32m✔  functions[competition]:[39m[22m [1mhttp[22m function initialized (http://localhost:5001/purdue-hcr-test/us-central1/competition).
-[1m[32m✔  functions[administration]:[39m[22m [1mhttp[22m function initialized (http://localhost:5001/purdue-hcr-test/us-central1/administration).
-[1m[32m✔ [39m[22m All emulators started, it is now safe to connect.
