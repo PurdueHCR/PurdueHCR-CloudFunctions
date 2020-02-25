@@ -4,6 +4,7 @@ import * as express from 'express';
 import * as bodyParser from "body-parser";
 //import { HouseCompetition } from './models/HouseCompetition';
 import {Link} from './models/Link';
+import { HouseCompetition } from './models/HouseCompetition';
 
 
 if(admin.apps.length === 0){
@@ -41,4 +42,23 @@ links_main.get('/getLink', (req, res) => {
     */
 
 
+})
+
+/**
+ * 
+ */
+links_main.post('/create' ,(req, res) => {
+
+    if(req.body["single_use"] === undefined || req.body["point_id"] === undefined || req.body["description"] === undefined){
+		res.status(422).send("Missing required parameters")
+    }
+    else{
+        const link = new Link("",false,req["user"]["user_id"], req.body["description"], false, parseInt(req.body["point_id"]), req.body["single_use"]);
+        db.collection(HouseCompetition.LINKS_KEY).add(link.toFirebaseJson()).then(ref => {
+            res.status(200).send("Success");
+        })
+        .catch( err => {
+            res.status(500).send("Unknown Server Error");
+        })
+    }
 })

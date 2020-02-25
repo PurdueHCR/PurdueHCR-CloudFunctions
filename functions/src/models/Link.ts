@@ -26,7 +26,17 @@ export class Link {
         this.pointId = pointId
         this.singleUse = singleUse
     }
-    
+
+    public toFirebaseJson(){
+        const map = {};
+        map[Link.ARCHIVED] = this.archived;
+        map[Link.CREATOR_ID] = this.creatorId;
+        map[Link.DESCRIPTION] = this.description;
+        map[Link.ENABLED] = this.enabled;
+        map[Link.POINT_ID] = this.pointId;
+        map[Link.SINGLE_USE] = this.singleUse;
+        return map;
+    }
     
 
     public static fromQuerySnapshotDocument(document: FirebaseFirestore.QueryDocumentSnapshot) {
