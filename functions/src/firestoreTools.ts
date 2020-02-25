@@ -7,6 +7,11 @@ const admin = require('firebase-admin');
 // when decoded successfully, the ID Token content will be added as `req.user`.
 const validateFirebaseIdToken = async (req, res , next) => {
 
+	if(req.path === '/getLink'){
+		next()
+		return;
+	}
+
 	if(req.path === '/getPointTypes'){
 		next()
 		return;

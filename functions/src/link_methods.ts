@@ -31,6 +31,25 @@ links_app.use(firestoreTools.validateFirebaseIdToken);
  *    use the id parameter to retrive and send that link
  */
 links_main.get('/getLink', (req, res) => {
+
+    if(req.query.id === null){
+        res.status(422).send("Missing required fields");
+    }
+    else{
+        db.collection(HouseCompetition.LINKS_KEY).doc(req.query.id).get().then(linkDoc =>{
+            if(linkDoc.exists){
+                const link = Link.fromSnapshotDocument(linkDoc);
+                res.status(200).send(JSON.stringify(link))
+            }
+            else{
+                res.status(400).send("Could not find link")
+            }
+        })
+        .catch( err => {
+            res.status(500).send("Server Error");
+        })
+    }
+
     //TODO
     /*
         1. Ensure that the query parameter exists
