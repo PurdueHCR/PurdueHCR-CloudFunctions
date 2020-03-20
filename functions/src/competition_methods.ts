@@ -136,7 +136,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 		.then(async pointTypeDocuments =>{
 			const pts: PointType[] = []
 			for( const pt of pointTypeDocuments.docs){
-				pts.push(new PointType(pt))
+				pts.push(PointType.fromCollectionDocument(pt))
 			}
 
 			const date = new Date(Date.parse(req.query.date))
@@ -270,7 +270,7 @@ comp_app.get('/getPointTypes', (req, res) => {
 	db.collection(HouseCompetition.POINT_TYPES_KEY).get().then(pointTypeListSnapshot => {
 		const pointTypeList: PointType[] = []
 		for ( const pointTypeDocument of pointTypeListSnapshot.docs){
-			pointTypeList.push(new PointType(pointTypeDocument));
+			pointTypeList.push(PointType.fromCollectionDocument(pointTypeDocument));
 		}
 		res.status(200).send(JSON.stringify(pointTypeList))
 	}).catch(err =>{
@@ -291,17 +291,6 @@ comp_app.get('/getSystemPreferences', (req, res) => {
 		6. Return 500 error if firebase error
 	*/
 })
-
-
-/**
- * competition/getPointTypes => retrieves the list of point types available to the user and sends them back
- * 
- */
-
-// Put code for /getPointTypes below
-
-// Put code for /getPointTypes above
-
 
 /**
  * competition/getHouses => retrieves the list of houses and sends them back
@@ -355,7 +344,7 @@ function getUserPointsFromDate(house:string, pts:PointType[], date:Date){
 		for(const plIterator of pointLogDocuments.docs ){
 
 			//create the point log
-			const pl = new PointLog(plIterator)
+			const pl = PointLog.fromQueryDocument(plIterator)
 
 			//If the point log has been approved
 			if(pl.pointTypeId > 0){

@@ -5,6 +5,9 @@ import * as bodyParser from "body-parser";
 import { HouseCode } from './models/Housecode';
 import {User} from './models/User';
 import { HouseCompetition } from './models/HouseCompetition';
+import { PointLog } from './models/PointLog';
+import { SystemPreference } from './models/SystemPreference';
+import { APIError } from './models/APIError';
 
 if(admin.apps.length === 0){
 	admin.initializeApp(functions.config().firebase);
@@ -89,16 +92,24 @@ users_app.get('/auth-rank',  (req, res) => {
 							"\t\"houseRank\" : "+houseRank +",\n"+
 							"\t\"semesterRank\" : "+semesterRank+"\n"+
 						"}");
+					console.log("SUCCESS WITH RANK")
+					return;
 				}
 			).catch(err => {
+				console.log("FAILED WITH DB FROM HOUSE ERROR: "+err)
 				res.status(500).send("Failed to sort house users with error: "+ res);
 			})
 		}
 		else{
+			console.log("FAILED COULD NOT FIND USER")
 			res.status(410).send("Undefined User Role");
 		}
 	})
-	.catch(err => res.status(500).send("Failed to retrieve user with error: "+ res));
+	.catch(err => {
+		console.log("FAILED WITH DB FROM user ERROR: "+err);
+		res.status(500).send("Failed to retrieve user with error: "+ res);
+	})
+		
 	
 })
 
@@ -148,14 +159,89 @@ users_app.post('/create', (req, res) => {
 /**
  * Return the user model for the firebase account noted in Authorization header
  */
-users_app.get('/getUser', (req, res) => {
-	//TODO 
-	/*
-		1. Get the user id from req["user"]["user_id"]
-		2. Get the user from the databse with that id
-		3. Cast the returned document into a User Model
-		4. Send the json version of the model in the response
-		5. return 400 error if could not find the user
-		6. Return 500 error if firebase error
-	*/
+users_app.get('/get', (req, res) => {
+
+	db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).get().then(userDocument => {
+		if(!userDocument.exists){
+			res.status(400).send("User does not exist")
+		}
+		else{
+			const user = User.fromDocumentSnapshot(userDocument);
+			res.status(200).send(user.toJson());
+		}
+	})
+	.catch( err => {
+		console.log("GET USER ERROR: "+err)
+		res.status(500).send("Server Error");
+	})
+
 })
+
+
+users_app.get('/submitPoint', (req, res) => {
+
+	//Tomorrow
+	// 1. Create API Doc and check params that they exist
+	// 2. Build rest of submit points methods
+	// 3. Determine best way to use promises and reusable methods across the code base
+
+	const log = new PointLog(null, null, admin.firestore.Timestamp.now(), admin.firestore.Timestamp.now(), "", "2N", 4, 0, 
+	"Bill", req["user"]["user_id"], "Bo Baggins", 0)
+	submitPoint(log, "").then((resp:User) =>{
+		res.status(200).send(resp.toJson())
+	}).catch( (error:APIError) => {
+		res.status(error.code).send(error.message)
+	})
+	/*
+	Parameters:
+	pointTypeId: number
+    residentFirstName: String
+    residentLastName: String
+    residentId: String
+	*/
+	//TODO
+	/*
+	0. Ensure paremeters exist
+	1. Get user
+	2. get point type
+	3. Get Competition Status
+	5. ensure the resident can submit this point type
+	6. set appropriate date fields
+	7. Save Record and update points if necessairy
+	*/
+	
+	//db.collection(HouseCompetition.)
+})
+
+function submitPoint(log: PointLog, documentId:String): Promise<any>{
+	
+	return getSystemPreferences().then((systemPreferences) => {
+		return getUser(log.residentId.toString());
+	})
+}
+
+function getSystemPreferences() : Promise<void | SystemPreference>{
+	return db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).doc(HouseCompetition.SYSTEM_PREFERENCES_DOCUMENT_KEY).get().then(preferencesDoc => {
+		const systemPreferences = SystemPreference.fromDocument(preferencesDoc);
+		return Promise.resolve(systemPreferences);
+	}).catch(err =>{
+		console.log("Error getting System Preferences. "+ err);
+		return  Promise.reject(new APIError(500, "Server Error"));
+	});
+}
+
+function getUser(id: string) : Promise<void | User> {
+	return db.collection(HouseCompetition.USERS_KEY).doc(id).get().then(userDocument => {
+		if(!userDocument.exists){
+			return  Promise.reject(new APIError(400, "User does not exist"));
+		}
+		else{
+			const user = User.fromDocumentSnapshot(userDocument);
+			return Promise.resolve(user);
+		}
+	})
+	.catch( err => {
+		console.log("GET USER ERROR: "+err)
+		return  Promise.reject(new APIError(500, "Server Error"));
+	})
+}

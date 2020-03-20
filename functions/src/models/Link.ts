@@ -37,17 +37,39 @@ export class Link {
         map[Link.SINGLE_USE] = this.singleUse;
         return map;
     }
+
+    public updateLinkFromData(data: any){
+        if("is_archived" in data){
+            this.archived = data["is_archived"]
+        }
+        if("is_enabled" in data){
+            this.enabled = data["is_enabled"]
+        }
+        if("creator_id" in data){
+            this.creatorId = data["creator_id"]
+        }
+        if("description" in data){
+            this.description = data["description"]
+        }
+        if("point_id" in data){
+            this.pointId = data["point_id"]
+        }
+        if("single_use" in data){
+            this.singleUse = data["single_use"]
+        }
+    }
     
 
     public static fromQuerySnapshotDocument(document: FirebaseFirestore.QueryDocumentSnapshot) {
-        return this.fromDocumentData(document.data())
+        return this.fromDocumentData(document.id, document.data())
     }
 
     public static fromSnapshotDocument(document: FirebaseFirestore.DocumentSnapshot) {
-        return this.fromDocumentData(document)
+        
+        return this.fromDocumentData(document.id, document.data()!)
     }
 
-    private static fromDocumentData(document: FirebaseFirestore.DocumentData){
+    private static fromDocumentData(docId: string, document: FirebaseFirestore.DocumentData){
         let id: String
         let archived: Boolean
         let creatorId: String
@@ -56,7 +78,7 @@ export class Link {
         let pointId: number
         let singleUse: Boolean
 
-        id = document.id;
+        id = docId;
         if(Link.ARCHIVED in document) {
             archived = document[Link.ARCHIVED];
         }

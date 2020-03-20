@@ -90,7 +90,7 @@ admin_app.get('/json_backup', (req, res) => {
                 .then(async pointTypeDocuments =>{
                     let ptIterator = 0;
                     while(ptIterator < pointTypeDocuments.docs.length){
-                        houseCompetition.pointTypes.push(new PointType((pointTypeDocuments.docs[ptIterator])));
+                        houseCompetition.pointTypes.push(PointType.fromCollectionDocument(pointTypeDocuments.docs[ptIterator]));
                         ptIterator++;
                     }
                     db.collection(HouseCompetition.REWARDS_KEY).get()
@@ -100,14 +100,7 @@ admin_app.get('/json_backup', (req, res) => {
                             houseCompetition.rewards.push(new Reward((rewardDocuments.docs[rIterator])));
                             rIterator++;
                         }
-                        db.collection(HouseCompetition.SYSTEM_PREFERENCES_KEY).get()
-                        .then(async sysPrefDocs =>{
-                            let spIterator = 0;
-                            while(spIterator < sysPrefDocs.docs.length){
-                                houseCompetition.systemPreference.set((sysPrefDocs.docs[spIterator]));
-                                spIterator++;
-                            }
-                            db.collection(HouseCompetition.USERS_KEY).get()
+                        db.collection(HouseCompetition.USERS_KEY).get()
                             .then(async userDocuments =>{
                                 let uIterator = 0;
                                 while(uIterator < userDocuments.docs.length){
@@ -117,8 +110,6 @@ admin_app.get('/json_backup', (req, res) => {
                                 res.status(200).send(JSON.stringify(houseCompetition));
                             })
                             .catch(err => res.send(500).send(err));
-                        })
-                        .catch(err => res.send(500).send(err));
                     })
                     .catch(err => res.send(500).send(err));
                 })
@@ -137,7 +128,7 @@ admin_app.get('/house_submissions_from_date', (req, res) => {
     .then(async pointTypeDocuments =>{
         const pts: PointType[] = []
         for( const pt of pointTypeDocuments.docs){
-            pts.push(new PointType(pt))
+            pts.push(PointType.fromCollectionDocument(pt))
         }
 
         const date = new Date(Date.parse(req.query.date))
@@ -150,7 +141,7 @@ admin_app.get('/house_submissions_from_date', (req, res) => {
             for(const plIterator of pointLogDocuments.docs ){
 
                 //create the point log
-                const pl = new PointLog(plIterator)
+                const pl = PointLog.fromQueryDocument(plIterator)
 
                 //If the point log has been approved
                 if(pl.pointTypeId > 0){

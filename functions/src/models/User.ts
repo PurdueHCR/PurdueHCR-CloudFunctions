@@ -15,12 +15,12 @@ export class User {
     house: String
     lastName: String
     lastSemesterPoints: number
-    permissionLevel: number
+    permissionLevel: UserPermissionLevel
     totalPoints: number
     id: String
 
     constructor(firstName:String, floorId:String, house: String, lastName: String, 
-        lastSemesterPoints: number, permissionLevel: number, totalPoints: number, id:String){
+        lastSemesterPoints: number, permissionLevel: UserPermissionLevel, totalPoints: number, id:String){
             this.firstName = firstName
             this.floorId = floorId
             this.house = house
@@ -41,68 +41,7 @@ export class User {
      * @param document Document from iterating through a collection
      */
     static fromQueryDocumentSnapshot(document: FirebaseFirestore.QueryDocumentSnapshot){
-        let firstName: String
-        let floorId: String
-        let house: String
-        let lastName: String
-        let lastSemesterPoints: number
-        let permissionLevel: number
-        let totalPoints: number
-        let id: String
-
-        id = document.id;
-
-
-        if( User.FIRST_NAME in document.data()){
-            firstName = document.data()[User.FIRST_NAME];
-        }
-        else{
-            firstName = "";
-        }
-        
-        if( User.FLOOR_ID in document.data()){
-            floorId = document.data()[User.FLOOR_ID];
-        }
-        else{
-            floorId = "";
-        }
-
-        if( User.HOUSE in document.data()){
-            house = document.data()[User.HOUSE];
-        }
-        else{
-            house = "";
-        }
-        
-        if( User.LAST_NAME in document.data()){
-            lastName = document.data()[User.LAST_NAME];
-        }
-        else{
-            lastName = "";
-        }
-        
-        if( User.LAST_SEMESTER_POINTS in document.data()){
-            lastSemesterPoints = document.data()[User.LAST_SEMESTER_POINTS];
-        }
-        else{
-            lastSemesterPoints = -1;
-        }
-
-        if( User.PERMISSION_LEVEL in document.data()){
-            permissionLevel = document.data()[User.PERMISSION_LEVEL];
-        }
-        else{
-            permissionLevel = -1;
-        }
-        
-        if( User.TOTAL_POINTS in document.data()){
-            totalPoints = document.data()[User.TOTAL_POINTS];
-        }
-        else{
-            totalPoints = -1;
-        }
-        return new User(firstName,floorId,house,lastName
-            ,lastSemesterPoints,permissionLevel,totalPoints,id)
+        return this.fromData(document.id, document.data())
     }
 
     /**
@@ -111,62 +50,66 @@ export class User {
      * @param document Document retrived 
      */
     static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot){
+        return this.fromData(document.id, document.data()!)
+    }
+
+    static fromData( docId: string, documentData: FirebaseFirestore.DocumentData){
         let firstName: String
         let floorId: String
         let house: String
         let lastName: String
         let lastSemesterPoints: number
-        let permissionLevel: number
+        let permissionLevel: UserPermissionLevel
         let totalPoints: number
         let id: String
 
-        id = document.id;
+        id = docId;
 
 
-        if( User.FIRST_NAME in document.data){
-            firstName = document.data[User.FIRST_NAME];
+        if( User.FIRST_NAME in documentData){
+            firstName = documentData[User.FIRST_NAME];
         }
         else{
             firstName = "";
         }
         
-        if( User.FLOOR_ID in document.data){
-            floorId = document.data[User.FLOOR_ID];
+        if( User.FLOOR_ID in documentData){
+            floorId = documentData[User.FLOOR_ID];
         }
         else{
             floorId = "";
         }
 
-        if( User.HOUSE in document.data){
-            house = document.data[User.HOUSE];
+        if( User.HOUSE in documentData){
+            house = documentData[User.HOUSE];
         }
         else{
             house = "";
         }
         
-        if( User.LAST_NAME in document.data){
-            lastName = document.data[User.LAST_NAME];
+        if( User.LAST_NAME in documentData){
+            lastName = documentData[User.LAST_NAME];
         }
         else{
             lastName = "";
         }
         
-        if( User.LAST_SEMESTER_POINTS in document.data){
-            lastSemesterPoints = document.data[User.LAST_SEMESTER_POINTS];
+        if( User.LAST_SEMESTER_POINTS in documentData){
+            lastSemesterPoints = documentData[User.LAST_SEMESTER_POINTS];
         }
         else{
             lastSemesterPoints = -1;
         }
 
-        if( User.PERMISSION_LEVEL in document.data){
-            permissionLevel = document.data[User.PERMISSION_LEVEL];
+        if( User.PERMISSION_LEVEL in documentData){
+            permissionLevel = documentData[User.PERMISSION_LEVEL];
         }
         else{
-            permissionLevel = -1;
+            permissionLevel = 0;
         }
         
-        if( User.TOTAL_POINTS in document.data){
-            totalPoints = document.data[User.TOTAL_POINTS];
+        if( User.TOTAL_POINTS in documentData){
+            totalPoints = documentData[User.TOTAL_POINTS];
         }
         else{
             totalPoints = -1;
@@ -212,3 +155,14 @@ export class UserWithPoints extends User {
         this.points.push(pl)
     }
 }
+
+export enum UserPermissionLevel {
+    RESIDENT = 0,
+    RHP = 1,
+    PROFESSIONAL_STAFF = 2,
+    FHP = 3,
+    PRIVILEGED_RESIDENTS = 4,
+    NHAS = 5
+
+}
+
