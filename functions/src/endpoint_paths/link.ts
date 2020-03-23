@@ -3,10 +3,10 @@ import * as admin from 'firebase-admin';
 import * as express from 'express';
 import * as bodyParser from "body-parser";
 //import { HouseCompetition } from './models/HouseCompetition';
-import {Link} from './models/Link';
-import { HouseCompetition } from './models/HouseCompetition';
-import { PointType } from './models/PointType';
-import { User } from './models/User';
+import {Link} from '../models/Link';
+import { HouseCompetition } from '../models/HouseCompetition';
+import { PointType } from '../models/PointType';
+import { User } from '../models/User';
 
 
 if(admin.apps.length === 0){
@@ -21,7 +21,7 @@ links_main.use(links_app);
 links_main.use(bodyParser.json());
 links_main.use(bodyParser.urlencoded({ extended: false }));
 
-const firestoreTools = require('./firestoreTools');
+const firestoreTools = require('../firestoreTools');
 
 export const link_main = functions.https.onRequest(links_main);
 

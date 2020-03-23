@@ -2,14 +2,14 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
 import * as bodyParser from "body-parser";
-import {createSaveSemesterPointsEmail} from "./email_functions/SaveSemesterPointsEmail";
-import {createResetHouseCompetitionEmail} from "./email_functions/ResetHouseCompetitionEmail";
-import { PointType } from './models/PointType';
-import { HouseCompetition } from './models/HouseCompetition';
-import { PointLog } from './models/PointLog';
+import {createSaveSemesterPointsEmail} from "../email_functions/SaveSemesterPointsEmail";
+import {createResetHouseCompetitionEmail} from "../email_functions/ResetHouseCompetitionEmail";
+import { PointType } from '../models/PointType';
+import { HouseCompetition } from '../models/HouseCompetition';
+import { PointLog } from '../models/PointLog';
 import { UserPointsFromDate } from './administration';
-import { House } from './models/House';
-import { User } from './models/User';
+import { House } from '../models/House';
+import { User } from '../models/User';
 
 
 class UsersAndErrorWrapper{
@@ -32,7 +32,7 @@ const comp_app = express();
 const cors = require('cors');
 const comp_main = express();
 const nodemailer = require('nodemailer');
-const firestoreTools = require('./firestoreTools');
+const firestoreTools = require('../firestoreTools');
 
 comp_main.use(comp_app);
 comp_main.use(bodyParser.json());
@@ -146,7 +146,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 				const houses: House[] = []
 				const usersByHouse: Map<string, Map<string, UserPointsFromDate>> = new Map()
 				for( const house of houseCollectionSnapshot.docs){
-					const hs = House.houseFromFirebaseDoc(house);
+					const hs = House.fromQueryDocument(house);
 					const uaew = await getUserPointsFromDate(hs.id, pts, date)
 					if(uaew.err !== null){
 						res.status(400).send("Failed "+ uaew.err.message.toString())

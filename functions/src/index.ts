@@ -1,8 +1,8 @@
-import {user_main} from "./user_methods";
-import {competition_main} from "./competition_methods";
-import {administration_main} from "./administration";
-import {link_main} from "./link_methods";
-import {pts_main} from "./point_type_methods";
+import {user_main} from "./endpoint_paths/user";
+import {competition_main} from "./endpoint_paths/competition";
+import {administration_main} from "./endpoint_paths/administration";
+import {link_main} from "./endpoint_paths/link";
+import {pts_main} from "./endpoint_paths/point_type";
 
 export const user = user_main;
 export const competition = competition_main;

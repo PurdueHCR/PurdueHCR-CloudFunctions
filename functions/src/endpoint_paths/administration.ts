@@ -2,14 +2,14 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
 import * as bodyParser from "body-parser";
-import {User} from "./models/User";
-import { HouseCompetition } from './models/HouseCompetition';
-import { House } from './models/House';
-import { HouseCode } from './models/Housecode';
-import { Link } from './models/Link';
-import { PointType } from './models/PointType';
-import { Reward } from './models/Reward';
-import { PointLog } from './models/PointLog';
+import {User} from "../models/User";
+import { HouseCompetition } from '../models/HouseCompetition';
+import { House } from '../models/House';
+import { HouseCode } from '../models/Housecode';
+import { Link } from '../models/Link';
+import { PointType } from '../models/PointType';
+import { Reward } from '../models/Reward';
+import { PointLog } from '../models/PointLog';
 
 //Make sure that the app is only initialized one time 
 if(admin.apps.length === 0){
@@ -20,7 +20,7 @@ const db = admin.firestore();
 const admin_app = express();
 const cors = require('cors');
 const admin_main = express();
-const firestoreTools = require('./firestoreTools');
+const firestoreTools = require('../firestoreTools');
 
 admin_main.use(admin_app);
 admin_main.use(bodyParser.json());
@@ -69,14 +69,14 @@ admin_app.get('/json_backup', (req, res) => {
     .then(async houseDocuments =>{
         let hIterator = 0;
         while(hIterator < houseDocuments.docs.length){
-            houseCompetition.houses.push(House.houseFromFirebaseDoc((houseDocuments.docs[hIterator])));
+            houseCompetition.houses.push(House.fromQueryDocument((houseDocuments.docs[hIterator])));
             hIterator++;
         }
         db.collection(HouseCompetition.HOUSE_CODES_KEY).get()
         .then(async houseCodeDocuments =>{
             let hcIterator = 0;
             while(hcIterator < houseCodeDocuments.docs.length){
-                houseCompetition.houseCodes.push(new HouseCode((houseCodeDocuments.docs[hcIterator])));
+                houseCompetition.houseCodes.push(HouseCode.fromDocumentSnapshot(houseCodeDocuments.docs[hcIterator]));
                 hcIterator++;
             }
             db.collection(HouseCompetition.LINKS_KEY).get()

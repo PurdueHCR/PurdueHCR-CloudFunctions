@@ -1,4 +1,4 @@
-import { UserPermissionLevel } from "./User"
+import { UserPermissionLevel } from "./UserPermissionLevel"
 
 export class PointType{
 
@@ -96,10 +96,10 @@ export class PointType{
         else if (userPermissionLevel === UserPermissionLevel.PROFESSIONAL_STAFF){
             return true
         }
-        else if(userPermissionLevel === UserPermissionLevel.FHP){
+        else if(userPermissionLevel === UserPermissionLevel.FACULTY){
             return this.permissionLevel > 2
         }
-        else if (userPermissionLevel === UserPermissionLevel.PRIVILEGED_RESIDENTS){
+        else if (userPermissionLevel === UserPermissionLevel.PRIVILEGED_RESIDENT){
             return this.permissionLevel > 2
         }
         else {

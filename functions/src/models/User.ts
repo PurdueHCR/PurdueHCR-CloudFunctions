@@ -1,5 +1,6 @@
 import { PointLog} from './PointLog'
 import { HouseCode } from './Housecode'
+import { UserPermissionLevel } from './UserPermissionLevel'
 export class User {
 
     static FIRST_NAME = "FirstName"
@@ -10,17 +11,17 @@ export class User {
     static LAST_SEMESTER_POINTS = "LastSemesterPoints"
     static TOTAL_POINTS = "TotalPoints"
 
-    firstName: String
-    floorId: String
-    house: String
-    lastName: String
+    firstName: string
+    floorId: string
+    house: string
+    lastName: string
     lastSemesterPoints: number
     permissionLevel: UserPermissionLevel
     totalPoints: number
-    id: String
+    id: string
 
-    constructor(firstName:String, floorId:String, house: String, lastName: String, 
-        lastSemesterPoints: number, permissionLevel: UserPermissionLevel, totalPoints: number, id:String){
+    constructor(firstName:string, floorId:string, house: string, lastName: string, 
+        lastSemesterPoints: number, permissionLevel: UserPermissionLevel, totalPoints: number, id:string){
             this.firstName = firstName
             this.floorId = floorId
             this.house = house
@@ -31,9 +32,19 @@ export class User {
             this.id = id
         }
 
-    public static fromCode(firstName: String, lastName: String, id: String, code:HouseCode){
+    static fromCode(firstName: string, lastName: string, id: string, code:HouseCode){
         return new User(firstName,code.floorId, code.house, lastName, 0, code.permissionLevel, 0, id)
     } 
+
+    getFullName(): string {
+        return this.firstName + " " + this.lastName
+    }
+
+    canSubmitPoints(): Boolean {
+        return this.permissionLevel === UserPermissionLevel.RESIDENT || 
+            this.permissionLevel === UserPermissionLevel.RHP || 
+            this.permissionLevel === UserPermissionLevel.PRIVILEGED_RESIDENT
+    }
 
     /**
      * This method takes a document that you get by retrieving a collection and turns it into a user model.
@@ -54,65 +65,65 @@ export class User {
     }
 
     static fromData( docId: string, documentData: FirebaseFirestore.DocumentData){
-        let firstName: String
-        let floorId: String
-        let house: String
-        let lastName: String
+        let firstName: string
+        let floorId: string
+        let house: string
+        let lastName: string
         let lastSemesterPoints: number
         let permissionLevel: UserPermissionLevel
         let totalPoints: number
-        let id: String
+        let id: string
 
-        id = docId;
+        id = docId
 
 
         if( User.FIRST_NAME in documentData){
-            firstName = documentData[User.FIRST_NAME];
+            firstName = documentData[User.FIRST_NAME]
         }
         else{
-            firstName = "";
+            firstName = ""
         }
         
         if( User.FLOOR_ID in documentData){
-            floorId = documentData[User.FLOOR_ID];
+            floorId = documentData[User.FLOOR_ID]
         }
         else{
-            floorId = "";
+            floorId = ""
         }
 
         if( User.HOUSE in documentData){
-            house = documentData[User.HOUSE];
+            house = documentData[User.HOUSE]
         }
         else{
-            house = "";
+            house = ""
         }
         
         if( User.LAST_NAME in documentData){
-            lastName = documentData[User.LAST_NAME];
+            lastName = documentData[User.LAST_NAME]
         }
         else{
-            lastName = "";
+            lastName = ""
         }
         
         if( User.LAST_SEMESTER_POINTS in documentData){
-            lastSemesterPoints = documentData[User.LAST_SEMESTER_POINTS];
+            lastSemesterPoints = documentData[User.LAST_SEMESTER_POINTS]
         }
         else{
-            lastSemesterPoints = -1;
+            lastSemesterPoints = -1
         }
 
         if( User.PERMISSION_LEVEL in documentData){
-            permissionLevel = documentData[User.PERMISSION_LEVEL];
+            permissionLevel = documentData[User.PERMISSION_LEVEL]
         }
         else{
-            permissionLevel = 0;
+            permissionLevel = 0
         }
         
         if( User.TOTAL_POINTS in documentData){
-            totalPoints = documentData[User.TOTAL_POINTS];
+            totalPoints = documentData[User.TOTAL_POINTS]
         }
         else{
-            totalPoints = -1;
+            totalPoints = -1
         }
         return new User(firstName,floorId,house,lastName
             ,lastSemesterPoints,permissionLevel,totalPoints,id)
@@ -128,7 +139,7 @@ export class User {
         data[User.TOTAL_POINTS] = this.totalPoints
         data[User.LAST_SEMESTER_POINTS] = this.lastSemesterPoints
         
-        return data;
+        return data
     }
 
 
@@ -141,9 +152,15 @@ export class User {
         data[User.PERMISSION_LEVEL] = this.permissionLevel
         data[User.TOTAL_POINTS] = this.totalPoints
         data[User.LAST_SEMESTER_POINTS] = this.lastSemesterPoints
-        data["id"] = this.id
         
-        return data;
+        return data
+    }
+
+    /// This method returns a map with the data used to update the users overall score
+    toPointUpdateJson() {
+        const data = {}
+        data[User.TOTAL_POINTS] = this.totalPoints
+        return data
     }
 
 }
@@ -156,13 +173,4 @@ export class UserWithPoints extends User {
     }
 }
 
-export enum UserPermissionLevel {
-    RESIDENT = 0,
-    RHP = 1,
-    PROFESSIONAL_STAFF = 2,
-    FHP = 3,
-    PRIVILEGED_RESIDENTS = 4,
-    NHAS = 5
-
-}
 

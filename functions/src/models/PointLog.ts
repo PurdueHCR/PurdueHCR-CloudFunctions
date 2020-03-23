@@ -1,4 +1,5 @@
-import { UserWithPoints } from "./User"
+import * as admin from "firebase-admin"
+import { UserWithPoints, User } from "./User"
 
 export class PointLog {
     static APPROVED_BY = "ApprovedBy"
@@ -14,12 +15,14 @@ export class PointLog {
     static RESIDENT_LAST_NAME = "ResidentLastName"
     static RESIDENT_NOTIFICATIONS = "ResidentNotifications"
 
+    static PREAPPROVED_NAME = "Preapproved"
+
     //Approved variables may not be filled if the point log has not been approved yet, so the type is unified with null
     approvedBy: string | null
-    approvedOn: FirebaseFirestore.Timestamp | null
+    approvedOn: admin.firestore.Timestamp | null
 
-    dateOccurred: FirebaseFirestore.Timestamp
-    dateSubmitted: FirebaseFirestore.Timestamp
+    dateOccurred: admin.firestore.Timestamp
+    dateSubmitted: admin.firestore.Timestamp
     description: string
     floorId: string
     pointTypeId: number
@@ -28,11 +31,13 @@ export class PointLog {
     residentId: string
     residentLastName: string
     residentNotifications: number
+    id: string
 
-    constructor(approvedBy: string | null, approvedOn: FirebaseFirestore.Timestamp | null, dateOccurred: FirebaseFirestore.Timestamp,
-        dateSubmitted: FirebaseFirestore.Timestamp, description: string, floorId: string, pointTypeId: number,
+    constructor(id:string, approvedBy: string | null, approvedOn: admin.firestore.Timestamp | null, dateOccurred: admin.firestore.Timestamp,
+        dateSubmitted: admin.firestore.Timestamp, description: string, floorId: string, pointTypeId: number,
         rhpNotifications: number, residentFirstName: string, residentId: string, residentLastName: string,
         residentNotifications: number) {
+        this.id = id
         this.approvedBy = approvedBy
         this.approvedOn = approvedOn
         this.dateOccurred = dateOccurred
@@ -47,19 +52,44 @@ export class PointLog {
         this.residentNotifications = residentNotifications
     }
 
-    static fromDocument( document: FirebaseFirestore.DocumentSnapshot): PointLog {
-        return this.fromData(document.data()!);
+    updateFieldsWithUser(user: User){
+        this.floorId = user.floorId.toString()
+        this.residentFirstName = user.firstName.toString()
+        this.residentLastName = user.lastName.toString()
+        this.residentId = user.id.toString()
     }
 
-    static fromQueryDocument( queryDocument: FirebaseFirestore.QueryDocumentSnapshot): PointLog {
-        return this.fromData(queryDocument.data());
+    /**
+     * Set the approved fields in the point log
+     * 
+     * @param approvingUser (optional) information about the user who approved the log. If null, then preapproved
+     */
+    approveLog(approvingUser?: User | null){
+        if(approvingUser){
+            this.approvedBy = approvingUser.getFullName()
+        }
+        else {
+            this.approvedBy = PointLog.PREAPPROVED_NAME
+        }
+        this.approvedOn = admin.firestore.Timestamp.now()
+
+        //Ensure that the point type id is positive. Negative implies the log is not approved yet
+        this.pointTypeId = Math.abs(this.pointTypeId)
     }
 
-    private static fromData(document: FirebaseFirestore.DocumentData): PointLog {
+    static fromDocument( document: admin.firestore.DocumentSnapshot): PointLog {
+        return this.fromData(document.id, document.data()!);
+    }
+
+    static fromQueryDocument( queryDocument: admin.firestore.QueryDocumentSnapshot): PointLog {
+        return this.fromData(queryDocument.id, queryDocument.data());
+    }
+
+    private static fromData(docId: string, document: admin.firestore.DocumentData): PointLog {
         let approvedBy: string | null
-        let approvedOn: FirebaseFirestore.Timestamp | null
-        let dateOccurred: FirebaseFirestore.Timestamp
-        let dateSubmitted: FirebaseFirestore.Timestamp
+        let approvedOn: admin.firestore.Timestamp | null
+        let dateOccurred: admin.firestore.Timestamp
+        let dateSubmitted: admin.firestore.Timestamp
         let description: string
         let floorId: string
         let pointTypeId: number
@@ -68,7 +98,9 @@ export class PointLog {
         let residentId: string
         let residentLastName: string
         let residentNotifications: number
+        let id: string
 
+        id = docId
 
         if(PointLog.APPROVED_BY in document){
             approvedBy = document[PointLog.APPROVED_BY]
@@ -96,9 +128,26 @@ export class PointLog {
         residentLastName = document[PointLog.RESIDENT_LAST_NAME]
         residentNotifications = document[PointLog.RESIDENT_NOTIFICATIONS]
 
-        return new PointLog(approvedBy, approvedOn, dateOccurred, dateSubmitted, description, floorId, pointTypeId, 
+        return new PointLog(id, approvedBy, approvedOn, dateOccurred, dateSubmitted, description, floorId, pointTypeId, 
             rhpNotifications, residentFirstName, residentId, residentLastName, residentNotifications)
 
+    }
+
+    toFirebaseJSON() {
+        const data = {}
+        data[PointLog.APPROVED_BY] = this.approvedBy
+        data[PointLog.APPROVED_ON] = this.approvedOn
+        data[PointLog.DATE_OCCURRED] = this.dateOccurred
+        data[PointLog.DATE_SUBMITTED] = this.dateSubmitted
+        data[PointLog.DESCRIPTION] = this.description
+        data[PointLog.FLOOR_ID] = this.floorId
+        data[PointLog.POINT_TYPE_ID] = this.pointTypeId
+        data[PointLog.RHP_NOTIFICATIONS] = this.rhpNotifications
+        data[PointLog.RESIDENT_FIRST_NAME]  = this.residentFirstName
+        data[PointLog.RESIDENT_ID] = this.residentId
+        data[PointLog.RESIDENT_LAST_NAME] = this.residentLastName
+        data[PointLog.RESIDENT_NOTIFICATIONS]  = this.residentNotifications
+        return data
     }
 
 

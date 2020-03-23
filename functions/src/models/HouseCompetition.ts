@@ -8,6 +8,8 @@ import { User } from "./User"
 export class HouseCompetition {
 
     static HOUSE_KEY = "House"
+    static HOUSE_COLLECTION_POINTS_KEY = "Points"
+    static HOUSE_COLLECTION_POINTS_COLLECTION_MESSAGES_KEY = "Messages"
     static HOUSE_CODES_KEY = "HouseCodes"
     static LINKS_KEY = "Links"
     static POINT_TYPES_KEY = "PointTypes"
