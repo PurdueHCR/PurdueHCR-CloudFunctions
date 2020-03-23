@@ -18,7 +18,7 @@ export async function addPoints(points: number, house_name: string, user_id?: st
     const db = admin.firestore()
 
 	//Ensure points is an integer
-	points = Math.floor(points)
+	const rounded_points = Math.floor(points)
 
 	return db.runTransaction(async (transaction) => {
 		//Get the current house
@@ -33,12 +33,12 @@ export async function addPoints(points: number, house_name: string, user_id?: st
 		}
 
 		//Add points to the house and update in database
-		house.totalPoints  += points
+		house.totalPoints  += rounded_points
 		transaction.update(db.collection(HouseCompetition.HOUSE_KEY).doc(house_name), house.toPointUpdateJson())
 
 		//If user id was provided, add points to user and update in database
 		if(user_id && user_id !== "" && user !== null){
-			user.totalPoints += points
+			user.totalPoints += rounded_points
 			transaction.update(db.collection(HouseCompetition.USERS_KEY).doc(user_id), user.toPointUpdateJson())
 		}
 		//Resolve the promise
