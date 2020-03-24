@@ -95,11 +95,7 @@ admin_app.get('/json_backup', (req, res) => {
                     }
                     db.collection(HouseCompetition.REWARDS_KEY).get()
                     .then(async rewardDocuments =>{
-                        let rIterator = 0;
-                        while(rIterator < rewardDocuments.docs.length){
-                            houseCompetition.rewards.push(new Reward((rewardDocuments.docs[rIterator])));
-                            rIterator++;
-                        }
+                        houseCompetition.rewards = Reward.fromQuerySnapshot(rewardDocuments)
                         db.collection(HouseCompetition.USERS_KEY).get()
                             .then(async userDocuments =>{
                                 let uIterator = 0;

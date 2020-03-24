@@ -1,4 +1,7 @@
 export class APIResponse{
+
+    static SUCCESS_CODE = 200
+
     code:  number
     message:  string
 
@@ -18,7 +21,7 @@ export class APIResponse{
     }
 
     static Success(): APIResponse {
-        return new APIResponse(200, "Success")
+        return new APIResponse(APIResponse.SUCCESS_CODE, "Success")
     }
     /**
      * User model does not exist in the database
