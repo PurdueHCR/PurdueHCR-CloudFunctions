@@ -31,3 +31,5 @@ How to setup CLI in bash shell
 			- Header Name: Authorization
 			- Header Value: (Paste the token)
 12. Hit send, and if you scroll to the bottom, you should see the response from the server. 200 Success and a json object with your user's infromation.
+13. Congratulations! You are now able to host an emulator with the development API!
+	- Go to https://purdue-hcr-test.firebaseapp.com/swagger-ui/ to see the list of endpoints available
