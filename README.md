@@ -4,17 +4,19 @@ How to setup PurdueHCR Cloud Functions on your computer!
 0. Make sure you have a bash termial. 
 	- [Git Bash](https://git-scm.com/download/win) (Windows)
 	- Terminal (iOS)
-1. make sure npm is installed
-	- Windows go to [Node.js](http://nodejs.org) to install
-	- Mac run ```brew install node```
-		- If brew is not installed, go to [Homebrew](https://brew.sh/) and install it.
+1. Open the bash terminal and make sure npm is installed
+	- run ```npm -v```. If the command is not found, install Node
+		- Windows go to [Node.js](http://nodejs.org) to install
+		- Mac run ```brew install node```
+			- If brew is not installed, go to [Homebrew](https://brew.sh/) and install it.
 2. Talk to an exec member to download the Google Firebase Key, DEV_key.json, and save the path to this file as the environmental variable $GOOGLE_APPLICATION_CREDENTIALS.
 	- ```GOOGLE_APPLICATION_CREDENTIALS='PATH TO DEV_key.json'```
 	- Note you have to give it an absolute path. using shortcuts like '..' may not work
-3. cd into the directory where you want the Cloud Functions to be saved and run
+3. Cd into the directory where you want the Cloud Functions to be saved and run the foloowing commands
 ```
 git clone https://github.com/PurdueHCR/PurdueHCR-CloudFunctions.git
 git checkout dev
+cd functions/
 npm install -g firebase-tools
 npm install firebase-functions@latest firebase-admin@latest --save
 firebase login
