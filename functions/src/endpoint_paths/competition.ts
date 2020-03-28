@@ -165,14 +165,14 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 					//Get the number of users
 					const count = listOfUserSnapshots.docs.length
 					let i = 0
-
+					const users = User.fromQuerySnapshot(listOfUserSnapshots)
 					//create a batch job
 					let batch = db.batch()
 					while( i < count){
 
 						//add an update to the user for the batch job
 						const ref = db.collection(HouseCompetition.USERS_KEY).doc(listOfUserSnapshots.docs[i].id)
-						const user = User.fromQueryDocumentSnapshot(listOfUserSnapshots.docs[i])
+						const user = users[i]
 						let userNewPointsSinceDate:number = 0
 						if(user.house != null && user.house !== "" && usersByHouse[user.house.toString()] != null && usersByHouse[user.house.toString()][user.id.toString()] != null){
 							userNewPointsSinceDate = usersByHouse[user.house.toString()][user.id.toString()].points
