@@ -6,6 +6,7 @@ import { APIResponse } from "../models/APIResponse"
 /**
  * Get list of all rewards
  * 
+ * @throws 500 - ServerError
  */
 export async function getAllRewards() : Promise<Reward[]> {
 	try {

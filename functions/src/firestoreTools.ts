@@ -1,3 +1,4 @@
+import { APIResponse } from "./models/APIResponse";
 
 
 const admin = require('firebase-admin');
@@ -38,8 +39,9 @@ const validateFirebaseIdToken = async (req, res , next) => {
     	console.error('No Firebase ID token was passed as a Bearer token in the Authorization header.',
         	'Make sure you authorize your request by providing the following HTTP header:',
         	'Authorization: Bearer <Firebase ID Token>',
-        	'or by passing a "__session" cookie.');
-    	res.status(401).send("{\"message\": \"Unauthorized: Confirm the token is valid.\"}");
+			'or by passing a "__session" cookie.');
+		const apiError = APIResponse.Unauthorized()
+    	res.status(apiError.code).send(apiError.toJson());
     	return;
   	}
 
@@ -54,7 +56,8 @@ const validateFirebaseIdToken = async (req, res , next) => {
     	idToken = req.cookies.__session;
   	} else {
     	// No cookie
-    	res.status(401).send("{\"message\": \"Unauthorized: Confirm the token is valid.\"}");
+    	const apiError = APIResponse.Unauthorized()
+    	res.status(apiError.code).send(apiError.toJson());
     	return;
   	}
 
@@ -66,7 +69,8 @@ const validateFirebaseIdToken = async (req, res , next) => {
     	return;
   	} catch (error) {
     	console.error('Error while verifying Firebase ID token:', error);
-    	res.status(401).send("{\"message\": \"Unauthorized: Confirm the token is valid.\"}");
+    	const apiError = APIResponse.ServerError()
+    	res.status(apiError.code).send(apiError.toJson());
     	return;
   	}
 };

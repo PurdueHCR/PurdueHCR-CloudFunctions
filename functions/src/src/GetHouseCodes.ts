@@ -3,6 +3,12 @@ import { HouseCode } from "../models/Housecode";
 import { HouseCompetition } from '../models/HouseCompetition';
 import { APIResponse } from '../models/APIResponse';
 
+/**
+ * Retrieve the list of house codes
+ * 
+ * @returns HouseCode[]
+ * @throws 	500 - ServerError
+ */
 export async function getHouseCodes(): Promise<HouseCode[]> {
     const db = admin.firestore()
     return db.collection(HouseCompetition.HOUSE_CODES_KEY).get().then(houseCodeDocs => {

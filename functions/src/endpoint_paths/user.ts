@@ -11,6 +11,7 @@ import { getUser } from '../src/GetUser'
 import { getHouseCodes } from '../src/GetHouseCodes'
 import { createUser } from '../src/CreateUser'
 import { isInDateRange } from '../src/IsInDateRange'
+import { getUserRank } from '../src/GetUserRank'
 
 if(admin.apps.length === 0){
 	admin.initializeApp(functions.config().firebase)
@@ -71,61 +72,36 @@ users_app.get('/rank',  (req,res) => {
 
 /**
  * Get the houseRank and semesterRank for the requesting user
+ * @returns UserRank
+ * @throws 400 - NonExistantUser
+ * @throws 401 - Unauthroized
+ * @throws 500 - ServerError
  */
-users_app.get('/auth-rank',  (req, res) => {
-	//Get user id. Check the house. Get the rank of the user
-	db.collection(HouseCompetition.USERS_KEY).doc(req["user"]["user_id"]).get()
-	.then(userDocument => {
-		if(userDocument.exists ){
-			const houseName = userDocument.data()!.House
-			db.collection(HouseCompetition.USERS_KEY)
-			.where('House', '==', houseName)
-				.get()
-				.then(snapshot => {
-					snapshot.docs.sort((u1,u2) => u2.data().TotalPoints - u1.data().TotalPoints)
-					let houseRank = 1
-					while(houseRank <= snapshot.docs.length && snapshot.docs[houseRank-1].data().TotalPoints !== userDocument.data()!.TotalPoints){
-						houseRank ++
-					}
-
-					snapshot.docs.sort((u1,u2) => (u2.data().TotalPoints -  u2.data().LastSemesterPoints) - (u1.data().TotalPoints - u1.data().LastSemesterPoints))
-					let semesterRank = 1
-					while(semesterRank <= snapshot.docs.length && 
-							(snapshot.docs[semesterRank-1].data().TotalPoints - snapshot.docs[semesterRank-1].data().LastSemesterPoints) 
-							!== (userDocument.data()!.TotalPoints - userDocument.data()!.LastSemesterPoints)){
-						semesterRank ++
-					}
-
-					res.status(200).send(
-						"{\n"+
-							"\t\"houseRank\" : "+houseRank +",\n"+
-							"\t\"semesterRank\" : "+semesterRank+"\n"+
-						"}")
-					return
-				}
-			).catch(err => {
-				console.log("FAILED WITH DB FROM HOUSE ERROR: "+err)
-				const error = APIResponse.ServerError()
-				res.status(error.code).send(error.toJson())
-			})
-		}
-		else{
-			console.log("FAILED COULD NOT FIND USER")
-			const error = APIResponse.NonExistantUser()
-			res.status(error.code).send(error.toJson())
-		}
-	})
-	.catch(err => {
-		console.log("FAILED WITH DB FROM user ERROR: "+err)
-		const error = APIResponse.ServerError()
-		res.status(error.code).send(error.toJson())
-	})
-		
-	
+users_app.get('/auth-rank',  async (req, res) => {
+	try{
+		const rank = await getUserRank(req["user"]["user_id"])
+		res.status(APIResponse.SUCCESS_CODE).send(rank.toJson())
+	}
+	catch (error){
+        if( error instanceof APIResponse){
+            res.status(error.code).send(error.toJson())
+        }
+        else {
+            console.log("Unknown Error: "+error.toString())
+            const apiResponse = APIResponse.ServerError()
+            res.status(apiResponse.code).send(apiResponse.toJson())
+        }
+    }
 })
 
 /**
- * Creates a user and returns it
+ * Creates a user
+ * @returns User
+ * @throws  401 - Unauthorized
+ * @throws 	410 - HouseCodeDoesNotExist
+ * @throws 	412 - UserAlreadyExists
+ * @throws 	422 - MissingRequiredParameters
+ * @throws 	500 - ServerError
  */
 users_app.post('/create', async (req, res) => {
 	//req["user"] is assigned in the FirebaseTools after user is authenticated
@@ -134,59 +110,30 @@ users_app.post('/create', async (req, res) => {
 		res.status(error.code).send(error.toJson())
 	}
 	else{
-		try {
-			await getUser(req["user"]["user_id"])
-			//User already exists, so we do not want to overwrite it
-			const error = APIResponse.UserAlreadyExists()
-			res.status(error.code).send(error.toJson())
+		try{
+			const success = await createUser(req["user"]["user_id"], req.query.code, req.query.first, req.query.last)
+			res.status(success.code).send(success.toJson())
 		}
-		catch(error){
-			try{
-				if(error instanceof APIResponse && error.code === 421){
-					const houseCodes = await getHouseCodes()
-					let found = false
-					for( const code of houseCodes){
-						if(code.code === req.query.code){
-							found = true
-							const user = User.fromCode(req.query.first,  req.query.last, req["user"]["user_id"], code)
-							await createUser(req["user"]["user_id"], user)
-
-							const success = APIResponse.Success()
-							res.status(success.code).send(success.toJson())
-						}
-					}
-					if(!found){
-						const apiResponse = APIResponse.HouseCodeDoesNotExist()
-						res.status(apiResponse.code).send(apiResponse.toJson())
-					}
-				}
-				else if (error instanceof APIResponse){
-					res.status(error.code).send(error.toJson())
-				}
-				else {
-					console.log("FAILED WITH DB FROM user ERROR: "+ error)
-					const apiResponse = APIResponse.ServerError()
-					res.status(apiResponse.code).send(apiResponse.toJson())
-				}
-			}
-			catch(suberror){
-				if (suberror instanceof APIResponse){
-					res.status(suberror.code).send(suberror.toJson())
-				}
-				else {
-					console.log("FAILED WITH DB FROM user ERROR: "+ suberror)
-					const apiResponse = APIResponse.ServerError()
-					res.status(apiResponse.code).send(apiResponse.toJson())
-				}
-			}
-			
-		}
+		catch(suberror){
+            if (suberror instanceof APIResponse){
+                res.status(suberror.code).send(suberror.toJson())
+            }
+            else {
+                console.log("FAILED WITH DB FROM user ERROR: "+ suberror)
+                const apiResponse = APIResponse.ServerError()
+                res.status(apiResponse.code).send(apiResponse.toJson())
+            }
+        }
 	}
 	
 })
 
 /**
  * Return the user model for the firebase account noted in Authorization header
+ * @returns User
+ * @throws 	400 - NonExistantUser
+ * @throws  401 - Unauthorized
+ * @throws 	500 - ServerError 
  */
 users_app.get('/get', async (req, res) => {
 	try{
@@ -207,6 +154,14 @@ users_app.get('/get', async (req, res) => {
 
 /**
  * Submit a point for this user
+ * 
+ * @throws  401 - Unauthorized
+ * @throws  408 - This User Can't Submit Points
+ * @throws  412 - House Competition Is Disabled
+ * @throws  418 - Point Type Is Disabled
+ * @throws  419 - Users Can Not Self Submit This Point Type
+ * @throws 	422 - MissingRequiredParameters
+ * @throws  500 - Server Error
  */
 users_app.post('/submitPoint', async (req, res) => {
 
@@ -221,9 +176,15 @@ users_app.post('/submitPoint', async (req, res) => {
 			const date_occurred = new Date(req.body.date_occurred)
 			if(isInDateRange(date_occurred)){
 				const log = new UnsubmittedPointLog(admin.firestore.Timestamp.fromDate(date_occurred), req.body.description, parseInt(req.body.point_type_id))
-				await submitPoint(req["user"]["user_id"], log, false)
+				const didAddPoints = await submitPoint(req["user"]["user_id"], log, false)
 				const success = APIResponse.Success()
-				res.status(success.code).send(success.toJson())
+				if(didAddPoints){
+					res.status(202).send(success.toJson())
+				}
+				else {
+					res.status(201).send(success.toJson())
+				}
+				
 			}
 			else {
 				const apiResponse = APIResponse.DateNotInRange()

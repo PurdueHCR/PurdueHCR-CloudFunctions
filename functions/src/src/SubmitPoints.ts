@@ -17,8 +17,16 @@ import { PointLogMessage } from '../models/PointLogMessage'
  * @param log 		Contains information about the point log
  * @param isGuaranteedApproval Is this a log which does not need an RHP to approve it
  * @param documentId (optional) does this point log have an id already - ex. single use QR codes
+ * @returns True if the points were added, false if needs approval
+ * 
+ * @throws 408 - This User Can't Submit Points
+ * @throws 409 - This Link Has Already Been Submitted
+ * @throws 412 - House Competition Is Disabled
+ * @throws 418 - Point Type Is Disabled
+ * @throws 419 - Users Can Not Self Submit This Point Type
+ * @throws 500 - Server Error
  */
-export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGuaranteedApproval: boolean, documentId?: string | null): Promise<any>{
+export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGuaranteedApproval: boolean, documentId?: string | null): Promise<Boolean>{
 
     const db = admin.firestore()
 
@@ -67,10 +75,11 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 				//If the log is automatically approved, add points to the user and the house
 				if(isGuaranteedApproval || user.permissionLevel === UserPermissionLevel.RHP){
 					await submitPointLogMessage(user.house, log, PointLogMessage.getPreaprovedMessage())
-					return addPoints(pointType.value, user.house, user.id)
+					await addPoints(pointType.value, user.house, user.id)
+					return Promise.resolve(true)
 				}
 				else {
-					return Promise.resolve()
+					return Promise.resolve(false)
 				}
 			}
 			else {

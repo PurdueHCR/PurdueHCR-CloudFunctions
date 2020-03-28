@@ -23,14 +23,25 @@ export class APIResponse{
     static Success(): APIResponse {
         return new APIResponse(APIResponse.SUCCESS_CODE, "Success")
     }
+
     /**
+     * 400 - User Does Not Exist
      * User model does not exist in the database
      */
     static NonExistantUser() : APIResponse {
-        return new APIResponse(400, "User does not exist")
+        return new APIResponse(400, "User Does Not Exist")
     }
 
     /**
+     * 401 - Unauthorized: Confirm The Token Is Valid.
+     * Provided token failed login
+     */
+    static Unauthorized(): APIResponse {
+        return new APIResponse(401, "Unauthorized: Confirm The Token Is Valid.")
+    }
+
+    /**
+     * 408 - This User Can't Submit Points
      * User's permission level is not a level which is allowed to submit points
      */
     static UserCantSubmitPoints(): APIResponse {
@@ -38,6 +49,7 @@ export class APIResponse{
     }
 
     /**
+     * 409 - This Link Has Already Been Submitted
      * The Link/QR code which was scanned is a single use code and this user has already scanned it
      */
     static LinkAlreadySubmitted(): APIResponse {
@@ -45,13 +57,15 @@ export class APIResponse{
     }
 
     /**
+     * 410 - House Code Does Not Exist
      * House code does not exist in the database
      */
     static HouseCodeDoesNotExist(): APIResponse {
-        return new APIResponse(410, "House Does Not Exist")
+        return new APIResponse(410, "House Code Does Not Exist")
     }
 
     /**
+     * 412 - House Competition Is Disabled
      * House Competition is disabled so the request may not be completed at this time
      */
     static CompetitionDisabled(): APIResponse {
@@ -59,6 +73,7 @@ export class APIResponse{
     }
 
     /**
+     * 417 - Unknown Point Type
      * Supplied Point Type Id does not exist in the database. This may occur if the point type is negative
      */
     static UnknownPointType(): APIResponse {
@@ -66,6 +81,7 @@ export class APIResponse{
     }
 
     /**
+     * 418 - Point Type Is Disabled
      * Point Type is not enabled for submissions at this time
      */
     static PointTypeDisabled(): APIResponse {
@@ -73,6 +89,7 @@ export class APIResponse{
     }
 
     /**
+     * 419 - Users Can Not Self Submit This Point Type
      * This point type does not allow users to self submit this point. IE it must be scanned through a link
      */
     static PointTypeSelfSubmissionDisabled(): APIResponse {
@@ -80,6 +97,15 @@ export class APIResponse{
     }
 
     /**
+     * 420 - Unknown Reward
+     * Supplied Reward Id does not exist in the database.
+     */
+    static UnknownReward(): APIResponse {
+        return new APIResponse(420, "Unknown Reward")
+    }
+
+    /**
+     * 412 - User Already Exists
      * User with that ID already exists in the database
      */
     static UserAlreadyExists(): APIResponse {
@@ -87,6 +113,7 @@ export class APIResponse{
     }
 
     /**
+     * 422 - Missing Required Parameters
      * Required parameters for this endpoint does not exist
      */
     static MissingRequiredParameters(): APIResponse {
@@ -94,6 +121,7 @@ export class APIResponse{
     }
 
     /**
+     * 423 - Could Not Parse Date Format
      * Could not parse date format
      */
     static InvalidDateFormat(): APIResponse {
@@ -101,6 +129,7 @@ export class APIResponse{
     }
 
     /**
+     * 424 - Date Is Not Allowed
      * Could not parse date format
      */
     static DateNotInRange(): APIResponse {
@@ -108,6 +137,15 @@ export class APIResponse{
     }
 
     /**
+     * 425 - Unknown House
+     * Supplied House Name does not exist in the database.
+     */
+    static UnknownHouse(): APIResponse {
+        return new APIResponse(425, "Unknown House")
+    }
+
+    /**
+     * 500 - Server Error
      * Unknown Firebase Firestore error
      */
     static ServerError(): APIResponse {

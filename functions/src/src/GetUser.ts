@@ -7,6 +7,8 @@ import { APIResponse } from '../models/APIResponse'
  * Get a user with an id
  * 
  * @param id Database id of the user to retrieve
+ * @throws 	400 - NonExistantUser
+ * @throws 	500 - ServerError 
  */
 export async function getUser(id: string) : Promise<User> {
 	try {

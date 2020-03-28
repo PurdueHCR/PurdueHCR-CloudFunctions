@@ -32,11 +32,15 @@ reward_app.use(firestoreTools.validateFirebaseIdToken)
 
 /**
  * use param.id. If it exists, then get the reward with that id. Otherwise just get all rewards
+ * @param (optional) query.id
+ * @throws 401 - Unauthorized
+ * @throws 420 - Unknown Reward
+ * @throws 500 - ServerError
  */
 reward_app.get('/get', async (req, res) =>{
     try{
-        if(req.param["id"] && req.param["id"] !== ""){
-            const reward = await getRewardById(req.param["id"])
+        if(req.query.id && req.query.id !== ""){
+            const reward = await getRewardById(req.query.id)
             res.status(APIResponse.SUCCESS_CODE).send(reward.toJson())
         }
         else {

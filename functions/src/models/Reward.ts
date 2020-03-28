@@ -4,11 +4,13 @@ export class Reward {
     static REQUIRED_PPR = "RequiredPPR"
     static REQUIRED_VALUE = "RequiredValue"
 
-    fileName: String
+    id: string
+    fileName: string
     requiredPPR: number
     requiredValue: number
 
-    constructor(fileName: String, requiredPPR: number, requiredValue: number){
+    constructor(id: string, fileName: string, requiredPPR: number, requiredValue: number){
+        this.id = id
         this.fileName = fileName
         this.requiredPPR = requiredPPR
         this.requiredValue = requiredValue
@@ -23,26 +25,27 @@ export class Reward {
     }
 
     static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): Reward {
-        return this.fromData(document.data()!)
+        return this.fromData(document.id, document.data()!)
     }
 
     static fromQuerySnapshot(snapshot: FirebaseFirestore.QuerySnapshot): Reward[] {
         const rewards: Reward[] = []
         for(const document of snapshot.docs){
-            rewards.push(this.fromData(document.data()))
+            rewards.push(this.fromData(document.id, document.data()))
         }
         return rewards
     }
 
-    private static fromData(document: FirebaseFirestore.DocumentData): Reward {
-        let fileName: String
+    private static fromData(documentId: string, document: FirebaseFirestore.DocumentData): Reward {
+        let id = documentId
+        let fileName: string
         let requiredPPR: number
         let requiredValue: number
 
         fileName = document[Reward.FILE_NAME];
         requiredPPR = document[Reward.REQUIRED_PPR]
         requiredValue = document[Reward.REQUIRED_VALUE]
-        return new Reward(fileName, requiredPPR, requiredValue)
+        return new Reward(id, fileName, requiredPPR, requiredValue)
     }
 
 }

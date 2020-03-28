@@ -10,6 +10,8 @@ import { APIResponse } from "../models/APIResponse"
  * @param house     Name of the house where the pointlog is saved
  * @param pointLog  Pointlog that has the message. (Only the id is needed)
  * @param message   Message to save
+ * 
+ * @throws 500 - Server Error
  */
 export async function submitPointLogMessage(house: string, pointLog: PointLog, message: PointLogMessage): Promise<void>{
 

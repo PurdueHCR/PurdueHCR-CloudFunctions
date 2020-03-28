@@ -47,12 +47,16 @@ export class User {
     }
 
     /**
-     * This method takes a document that you get by retrieving a collection and turns it into a user model.
+     * This method takes a querysnapshot that you get by retrieving a collection and turns it into a list of user model.
      * 
-     * @param document Document from iterating through a collection
+     * @param snapshot Querysnapshot that has DocumentData of Users
      */
-    static fromQueryDocumentSnapshot(document: FirebaseFirestore.QueryDocumentSnapshot){
-        return this.fromData(document.id, document.data())
+    static fromQuerySnapshot(snapshot: FirebaseFirestore.QuerySnapshot): User[]{
+        const users: User[] = []
+        for(const document of snapshot.docs){
+            users.push(this.fromData(document.id, document.data()))
+        }
+        return users
     }
 
     /**
