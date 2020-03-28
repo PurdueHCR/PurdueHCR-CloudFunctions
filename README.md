@@ -9,6 +9,7 @@ How to setup CLI in bash shell
 	- Mac run "brew install node"
 		- If brew is not installed, go to https://brew.sh/ and install it.
 2. cd into the directory where you want the Cloud Functions to be saved, and git clone the repository
+	- bash command: git clone https://github.com/PurdueHCR/PurdueHCR-CloudFunctions.git
 3. cd into the functions directory and run "npm install -g firebase-tools"
 4. run "npm install firebase-functions@latest firebase-admin@latest --save"
 5. run "firebase login" and  log into your account
