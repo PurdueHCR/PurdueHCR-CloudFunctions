@@ -136,7 +136,7 @@ users_app.post('/create', async (req, res) => {
 users_app.get('/get', async (req, res) => {
 	try{
 		const user = await getUser(req["user"]["user_id"])
-		res.status(200).send(user.toJson())
+		res.status(APIResponse.SUCCESS_CODE).send(user.toJson())
 	}
 	catch(error){
 		if(error instanceof APIResponse){
@@ -207,4 +207,20 @@ users_app.post('/submitPoint', async (req, res) => {
 		}
 	}
 
+})
+
+
+/**
+ * Returns a list of point logs submitted by a user
+ * 
+ * @param query.limit	Optional query parameter. If provided, only return the <limit> most recently submitted points. Else return all submitted points
+ * @param query.handledOnly Optional query parameter. If provided, only return point logs that follow this parameter
+ * @param query.id	Optional query parameter. If provided, only return the point log with the given id
+ * @throws 401 - Unauthorized
+ * Any other errors you find while making this code
+ * @throws 500 - ServerError
+ */
+users_app.get('/points', (req, res) => {
+	//Create a function in the src folder that takes the optional parameters and returns the appropriate list of point logs
+	//look at user/get for an example of how to call these functions and look in the src folder for an example function
 })

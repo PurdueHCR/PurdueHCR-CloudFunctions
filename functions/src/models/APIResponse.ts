@@ -41,6 +41,14 @@ export class APIResponse{
     }
 
     /**
+     * 402 - Unknown House Id
+     * Id provided does not match a house in the database
+     */
+    static UnknownHouseId(): APIResponse {
+        return new APIResponse(402, "Could not find House with that id.")
+    }
+
+    /**
      * 408 - This User Can't Submit Points
      * User's permission level is not a level which is allowed to submit points
      */
