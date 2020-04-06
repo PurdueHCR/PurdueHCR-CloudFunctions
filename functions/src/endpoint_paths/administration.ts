@@ -66,12 +66,8 @@ admin_app.get('/json_backup', (req, res) => {
     const houseCompetition = new HouseCompetition()
     
     db.collection(HouseCompetition.HOUSE_KEY).get()
-    .then(async houseDocuments =>{
-        let hIterator = 0;
-        while(hIterator < houseDocuments.docs.length){
-            houseCompetition.houses.push(House.fromQueryDocument((houseDocuments.docs[hIterator])));
-            hIterator++;
-        }
+    .then(async housesSnapshot =>{
+        houseCompetition.houses = House.fromQuerySnapshot(housesSnapshot)
         db.collection(HouseCompetition.HOUSE_CODES_KEY).get()
         .then(async houseCodeDocuments =>{
             let hcIterator = 0;
@@ -125,15 +121,13 @@ admin_app.get('/house_submissions_from_date', (req, res) => {
 
         const date = new Date(Date.parse(req.query.date))
         db.collection(HouseCompetition.HOUSE_KEY).doc(req.query.house).collection('Points').where('DateSubmitted', '>', date).get()
-        .then(async pointLogDocuments =>{
+        .then(async pointLogsSnapshot =>{
             
             //Create new list of users
             const users: UserPointsFromDate[] = []
+            const pointLogs = PointLog.fromQuerySnapshot(pointLogsSnapshot)
             //iterate through all of the pointlog documents
-            for(const plIterator of pointLogDocuments.docs ){
-
-                //create the point log
-                const pl = PointLog.fromQueryDocument(plIterator)
+            for(const pl of pointLogs){
 
                 //If the point log has been approved
                 if(pl.pointTypeId > 0){

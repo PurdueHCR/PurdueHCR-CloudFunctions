@@ -19,12 +19,16 @@ export class House {
         this.id = id
     }
 
-    static fromDocument(document: FirebaseFirestore.DocumentSnapshot): House{
+    static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): House{
         return this.fromData(document.data()!)
     }
 
-    static fromQueryDocument(document: FirebaseFirestore.QueryDocumentSnapshot): House{
-        return this.fromData(document.data())
+    static fromQuerySnapshot(snapshot: FirebaseFirestore.QuerySnapshot): House[]{
+        const houses: House[] = []
+        for(const document of snapshot.docs){
+            houses.push(this.fromData(document.data()))
+        }
+        return houses
     }
 
     private static fromData(document: FirebaseFirestore.DocumentData): House{

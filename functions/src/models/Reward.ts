@@ -25,19 +25,19 @@ export class Reward {
     }
 
     static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): Reward {
-        return this.fromData(document.id, document.data()!)
+        return this.fromData(document.data()!)
     }
 
     static fromQuerySnapshot(snapshot: FirebaseFirestore.QuerySnapshot): Reward[] {
         const rewards: Reward[] = []
         for(const document of snapshot.docs){
-            rewards.push(this.fromData(document.id, document.data()))
+            rewards.push(this.fromData(document.data()))
         }
         return rewards
     }
 
-    private static fromData(documentId: string, document: FirebaseFirestore.DocumentData): Reward {
-        let id = documentId
+    private static fromData(document: FirebaseFirestore.DocumentData): Reward {
+        let id = document.id
         let fileName: string
         let requiredPPR: number
         let requiredValue: number

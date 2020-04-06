@@ -142,11 +142,10 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 			const date = new Date(Date.parse(req.query.date))
 			
 			//Get all the houses
-			db.collection(HouseCompetition.HOUSE_KEY).get().then(async houseCollectionSnapshot => {
-				const houses: House[] = []
+			db.collection(HouseCompetition.HOUSE_KEY).get().then(async housesSnapshot => {
+				const houses: House[] = House.fromQuerySnapshot(housesSnapshot)
 				const usersByHouse: Map<string, Map<string, UserPointsFromDate>> = new Map()
-				for( const house of houseCollectionSnapshot.docs){
-					const hs = House.fromQueryDocument(house)
+				for( const hs of houses){
 					const uaew = await getUserPointsFromDate(hs.id, pts, date)
 					if(uaew.err !== null){
 						res.status(400).send("Failed "+ uaew.err.message.toString())
@@ -154,7 +153,6 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 					}
 					else{
 						usersByHouse[hs.id] = uaew.userByUserId
-						houses.push(hs)
 					}
 					
 				}
@@ -336,15 +334,13 @@ function getUserPointsFromDate(house:string, pts:PointType[], date:Date){
 		
 		//Get 
 	db.collection(HouseCompetition.HOUSE_KEY).doc(house).collection('Points').where('DateSubmitted', '>', date).get()
-	.then(async pointLogDocuments =>{
+	.then(async pointLogSnapshot =>{
 
 		const usersFromUserID: Map<string, UserPointsFromDate> = new Map()
+		const pointLogs = PointLog.fromQuerySnapshot(pointLogSnapshot)
 		//Create new list of users
 		//iterate through all of the pointlog documents
-		for(const plIterator of pointLogDocuments.docs ){
-
-			//create the point log
-			const pl = PointLog.fromQueryDocument(plIterator)
+		for(const pl of pointLogs ){
 
 			//If the point log has been approved
 			if(pl.pointTypeId > 0){

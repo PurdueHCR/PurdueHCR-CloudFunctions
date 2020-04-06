@@ -11,12 +11,12 @@ import { House } from '../models/House'
 export async function getHouseByName(name: string) : Promise<House> {
 	try {
         const db = admin.firestore()
-		const houseDocument = await db.collection(HouseCompetition.HOUSE_KEY).doc(name).get()
-		if(!houseDocument.exists){
+		const houseDocumentSnapshot = await db.collection(HouseCompetition.HOUSE_KEY).doc(name).get()
+		if(!houseDocumentSnapshot.exists){
 			return Promise.reject(APIResponse.UnknownHouse())
 		}
 		else{
-			const house = House.fromDocument(houseDocument)
+			const house = House.fromDocumentSnapshot(houseDocumentSnapshot)
 			return Promise.resolve(house)
 		}
 	}

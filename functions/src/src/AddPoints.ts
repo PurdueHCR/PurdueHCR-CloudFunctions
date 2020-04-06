@@ -26,8 +26,8 @@ export async function addPoints(points: number, house_name: string, user_id?: st
 	try {
 		return db.runTransaction(async (transaction) => {
 			//Get the current house
-			const houseDocument = await transaction.get(db.collection(HouseCompetition.HOUSE_KEY).doc(house_name))
-			const house = House.fromDocument(houseDocument)
+			const houseSnapshot = await transaction.get(db.collection(HouseCompetition.HOUSE_KEY).doc(house_name))
+			const house = House.fromDocumentSnapshot(houseSnapshot)
 	
 			//If a user id was provided, get the user
 			let user: User | null = null

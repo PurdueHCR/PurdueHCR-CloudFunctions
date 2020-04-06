@@ -221,6 +221,9 @@ users_app.post('/submitPoint', async (req, res) => {
  * @throws 500 - ServerError
  */
 users_app.get('/points', (req, res) => {
-	//Create a function in the src folder that takes the optional parameters and returns the appropriate list of point logs
-	//look at user/get for an example of how to call these functions and look in the src folder for an example function
+	//Create an async function in the src folder that takes the optional parameters and returns the appropriate list of point logs as a promise.
+	//look at user/get for an example of how to call these functions and look in the src folder for example functions. (GetRewardById.ts should be helpful)
+
+	//To find the userid, you will have to find examples above that look in the request object to find the id.
+	
 })

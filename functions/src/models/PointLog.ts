@@ -77,15 +77,19 @@ export class PointLog {
         this.pointTypeId = Math.abs(this.pointTypeId)
     }
 
-    static fromDocument( document: admin.firestore.DocumentSnapshot): PointLog {
-        return this.fromData(document.id, document.data()!);
+    static fromDocumentSnapshot( document: admin.firestore.DocumentSnapshot): PointLog {
+        return this.fromData(document.data()!);
     }
 
-    static fromQueryDocument( queryDocument: admin.firestore.QueryDocumentSnapshot): PointLog {
-        return this.fromData(queryDocument.id, queryDocument.data());
+    static fromQuerySnapshot( snapshot: admin.firestore.QuerySnapshot): PointLog[] {
+        const pointLogs: PointLog[] = []
+        for( const document of snapshot.docs){
+            pointLogs.push(this.fromData(document.data()))
+        }
+        return pointLogs;
     }
 
-    private static fromData(docId: string, document: admin.firestore.DocumentData): PointLog {
+    private static fromData(document: admin.firestore.DocumentData): PointLog {
         let approvedBy: string | null
         let approvedOn: admin.firestore.Timestamp | null
         let dateOccurred: admin.firestore.Timestamp
@@ -100,7 +104,7 @@ export class PointLog {
         let residentNotifications: number
         let id: string
 
-        id = docId
+        id = document.id
 
         if(PointLog.APPROVED_BY in document){
             approvedBy = document[PointLog.APPROVED_BY]
