@@ -83,12 +83,8 @@ admin_app.get('/json_backup', (req, res) => {
                     lIterator++;
                 }
                 db.collection(HouseCompetition.POINT_TYPES_KEY).get()
-                .then(async pointTypeDocuments =>{
-                    let ptIterator = 0;
-                    while(ptIterator < pointTypeDocuments.docs.length){
-                        houseCompetition.pointTypes.push(PointType.fromCollectionDocument(pointTypeDocuments.docs[ptIterator]));
-                        ptIterator++;
-                    }
+                .then(async pointTypeSnapshot =>{
+                    houseCompetition.pointTypes = PointType.fromQuerySnapshot(pointTypeSnapshot)
                     db.collection(HouseCompetition.REWARDS_KEY).get()
                     .then(async rewardDocuments =>{
                         houseCompetition.rewards = Reward.fromQuerySnapshot(rewardDocuments)
@@ -114,10 +110,7 @@ admin_app.get('/house_submissions_from_date', (req, res) => {
 
     db.collection(HouseCompetition.POINT_TYPES_KEY).get()
     .then(async pointTypeDocuments =>{
-        const pts: PointType[] = []
-        for( const pt of pointTypeDocuments.docs){
-            pts.push(PointType.fromCollectionDocument(pt))
-        }
+        const pts  = PointType.fromQuerySnapshot(pointTypeDocuments)
 
         const date = new Date(Date.parse(req.query.date))
         db.collection(HouseCompetition.HOUSE_KEY).doc(req.query.house).collection('Points').where('DateSubmitted', '>', date).get()

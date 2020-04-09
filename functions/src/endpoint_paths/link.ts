@@ -86,7 +86,7 @@ links_main.post('/create' ,(req, res) => {
             const user = User.fromDocumentSnapshot(userDoc);
             db.collection(HouseCompetition.POINT_TYPES_KEY).doc(point_id.toString()).get().then(pointDoc => {
                 if(pointDoc.exists){
-                    const pointType = PointType.fromDocument(pointDoc);
+                    const pointType = PointType.fromDocumentSnapshot(pointDoc);
                     if(pointType.userCanGenerateQRCodes(user.permissionLevel)){
                         const link = new Link(blank_id,is_archived,user_id, description, is_enabled, point_id, is_single_use);
                         db.collection(HouseCompetition.LINKS_KEY).add(link.toFirebaseJson()).then(ref => {
@@ -155,7 +155,7 @@ links_main.post('/update' ,(req, res) => {
                             console.log("Got From Point Id")
                             if(pointDoc.exists){
                                 console.log("Exists")
-                                const pointType = PointType.fromDocument(pointDoc);
+                                const pointType = PointType.fromDocumentSnapshot(pointDoc);
                                 if(pointType.userCanGenerateQRCodes(user.permissionLevel)){
                                     db.collection(HouseCompetition.LINKS_KEY).doc(req.body["link_id"]).set(link.toFirebaseJson()).then(ref => {
                                         res.status(200).send("{\"message\": \"Success\"}");

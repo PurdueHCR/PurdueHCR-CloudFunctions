@@ -154,7 +154,7 @@ users_app.get('/get', async (req, res) => {
  * Submit a point for this user
  * 
  * @throws  401 - Unauthorized
- * @throws  408 - This User Can't Submit Points
+ * @throws  403 - Invalid Permission Level
  * @throws  412 - House Competition Is Disabled
  * @throws  418 - Point Type Is Disabled
  * @throws  419 - Users Can Not Self Submit This Point Type

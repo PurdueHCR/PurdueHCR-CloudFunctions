@@ -19,7 +19,7 @@ import { PointLogMessage } from '../models/PointLogMessage'
  * @param documentId (optional) does this point log have an id already - ex. single use QR codes
  * @returns True if the points were added, false if needs approval
  * 
- * @throws 408 - This User Can't Submit Points
+ * @throws 403 - This User does not have the correct permission levels.
  * @throws 409 - This Link Has Already Been Submitted
  * @throws 412 - House Competition Is Disabled
  * @throws 418 - Point Type Is Disabled
@@ -83,7 +83,7 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 				}
 			}
 			else {
-				return Promise.reject(APIResponse.UserCantSubmitPoints())
+				return Promise.reject(APIResponse.InvalidPermissionLevel())
 			}
 		}
 		else if(!pointType.residentCanSubmit){

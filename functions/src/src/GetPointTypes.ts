@@ -8,17 +8,12 @@ import { APIResponse } from "../models/APIResponse"
  * 
  * @param id The id of the PointType to retrieve
  */
-export async function getPointTypeById(id: number) : Promise<PointType> {
+export async function getPointTypes() : Promise<PointType[]> {
 	try {
         const db = admin.firestore()
-		const pointTypeDocument = await db.collection(HouseCompetition.POINT_TYPES_KEY).doc(id.toString()).get()
-		if(!pointTypeDocument.exists){
-			return Promise.reject(APIResponse.UnknownPointType())
-		}
-		else{
-			const pointType = PointType.fromDocumentSnapshot(pointTypeDocument)
-			return Promise.resolve(pointType)
-		}
+		const pointTypeSnapshot = await db.collection(HouseCompetition.POINT_TYPES_KEY).get()
+		
+		return Promise.resolve(PointType.fromQuerySnapshot(pointTypeSnapshot))
 	}
 	catch (err) {
 		console.log("GET Point type Error: " + err)

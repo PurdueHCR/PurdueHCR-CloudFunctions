@@ -28,16 +28,20 @@ export class PointType{
             this.value = value;
     }
 
-    static fromCollectionDocument(document: FirebaseFirestore.QueryDocumentSnapshot){
-        return this.fromData(document.id, document.data());
+    static fromQuerySnapshot(snapshot: FirebaseFirestore.QuerySnapshot): PointType[]{
+        const types: PointType[] = []
+        for( const document of snapshot.docs){
+            types.push(this.fromData(document.data()))
+        }
+        return types;
     }
 
-    static fromDocument(document: FirebaseFirestore.DocumentSnapshot){
-        return this.fromData(document.id, document.data()!);
+    static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): PointType{
+        return this.fromData(document.data()!);
     }
 
-    private static fromData(doc_id: string, document: FirebaseFirestore.DocumentData){
-        const id = doc_id;
+    private static fromData(document: FirebaseFirestore.DocumentData){
+        const id = document.id;
         let  description = ""
         let enabled = false
         let name = ""

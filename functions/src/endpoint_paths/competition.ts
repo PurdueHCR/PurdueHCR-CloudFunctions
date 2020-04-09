@@ -134,10 +134,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 		//Get the Point Types
 		db.collection(HouseCompetition.POINT_TYPES_KEY).get()
 		.then(async pointTypeDocuments =>{
-			const pts: PointType[] = []
-			for( const pt of pointTypeDocuments.docs){
-				pts.push(PointType.fromCollectionDocument(pt))
-			}
+			const pts = PointType.fromQuerySnapshot(pointTypeDocuments)
 
 			const date = new Date(Date.parse(req.query.date))
 			
@@ -266,10 +263,7 @@ comp_app.get('/secret-reset-house-competition', (req,res) => {
 
 comp_app.get('/getPointTypes', (req, res) => {
 	db.collection(HouseCompetition.POINT_TYPES_KEY).get().then(pointTypeListSnapshot => {
-		const pointTypeList: PointType[] = []
-		for ( const pointTypeDocument of pointTypeListSnapshot.docs){
-			pointTypeList.push(PointType.fromCollectionDocument(pointTypeDocument))
-		}
+		const pointTypeList = PointType.fromQuerySnapshot(pointTypeListSnapshot)
 		res.status(200).send(JSON.stringify(pointTypeList))
 	}).catch(err =>{
 		res.status(400).send(""+err.message)

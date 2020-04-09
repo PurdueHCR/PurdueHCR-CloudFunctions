@@ -47,13 +47,13 @@ export class APIResponse{
     static UnknownHouseId(): APIResponse {
         return new APIResponse(402, "Could not find House with that id.")
     }
-
+    
     /**
-     * 408 - This User Can't Submit Points
-     * User's permission level is not a level which is allowed to submit points
+     * 403 - This User does not have the correct permission levels.
+     * User's permission level is not a level which is allowed to perform this action 
      */
-    static UserCantSubmitPoints(): APIResponse {
-        return new APIResponse(408, "This User Can't Submit Points")
+    static InvalidPermissionLevel(): APIResponse {
+        return new APIResponse(403, "This User does not have the correct permission levels.")
     }
 
     /**
