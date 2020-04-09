@@ -1,6 +1,7 @@
 # PurdueHCR-CloudFunctions
 
-How to run and test Cloud Functions on your computer!
+# How to run and test Cloud Functions on your computer!
+
 0. Make sure that you export your Google Cloud Credentials
 	- ```export GOOGLE_APPLICATION_CREDENTIALS='PATH TO DEV_key.json'```
 1. cd into your functions folder
@@ -23,7 +24,7 @@ How to run and test Cloud Functions on your computer!
 
 
 
-How to setup PurdueHCR Cloud Functions on your computer!
+# How to setup PurdueHCR Cloud Functions on your computer!
 
 0. Make sure you have a bash termial installed. 
 	- [Git Bash](https://git-scm.com/download/win) (Windows)
