@@ -1,4 +1,28 @@
 # PurdueHCR-CloudFunctions
+
+How to run and test Cloud Functions on your computer!
+0. Make sure that you export your Google Cloud Credentials
+	- ```export GOOGLE_APPLICATION_CREDENTIALS='PATH TO DEV_key.json'```
+1. cd into your functions folder
+2. run ```npm run build ```
+3. Fix any errors then run ```firebase emulators:start --only functions```
+4. Now open the PurdueHCR Webapp and naivgate to the [token page](https://purdue-hcr-test.firebaseapp.com/#/token). Log in, and copy the token.
+	- If you are not taken to a page with a token, make sure you are logged in and the url ends in /token.
+5. Open ARC and type into the following fields:
+	- Request URL: http://localhost:5001/purdue-hcr-test/us-central1/user/get
+		- or optionally 
+			- Host: http://localhost:5001
+			- Path: /purdue-hcr-test/us-central1/user/get
+	- Parameters
+		- Headers
+			- Header Name: Authorization
+			- Header Value: (Paste the token)
+6. Hit send, and if you scroll to the bottom, you should see the response from the server. 200 Success and a json object with your user's infromation.
+7. Congratulations! You are now able to host an emulator with the development API!
+	- Go to our [API Documentation](https://purdue-hcr-test.firebaseapp.com/swagger-ui/) to see a list of available endpoints
+
+
+
 How to setup PurdueHCR Cloud Functions on your computer!
 
 0. Make sure you have a bash termial installed. 
@@ -10,7 +34,7 @@ How to setup PurdueHCR Cloud Functions on your computer!
 		- Mac run ```brew install node```
 			- If brew is not installed, go to [Homebrew](https://brew.sh/) and install it.
 2. Talk to an exec member to download the Google Firebase Key, DEV_key.json, and save the path to this file as the environmental variable $GOOGLE_APPLICATION_CREDENTIALS.
-	- ```GOOGLE_APPLICATION_CREDENTIALS='PATH TO DEV_key.json'```
+	- ```export GOOGLE_APPLICATION_CREDENTIALS='PATH TO DEV_key.json'```
 	- Note you have to give it an absolute path. using shortcuts like '..' may not work
 3. Cd into the directory where you want the Cloud Functions to be saved and run the foloowing commands:
 ```
