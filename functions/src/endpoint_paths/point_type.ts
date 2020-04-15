@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as express from 'express'
 import * as bodyParser from "body-parser"
+import { APIResponse } from '../models/APIResponse'
 import { HouseCompetition } from '../models/HouseCompetition'
 import { PointType } from '../models/PointType'
 import { User} from '../models/User'
@@ -81,3 +82,38 @@ pt_app.get('/get', (req, res) => {
 // Put code for /getPointTypes above
 
 
+/**
+ * point_type/update => updates fields in the point type with the passed in ID
+ * 
+ * @throws  400 - UserDoesNotExist
+ * @throws  401 - Unauthorized
+ * @throws  403 - 
+ * @throws 	422 - MissingRequiredParameters
+ * @throws  500 - Server Error
+ */
+pt_app.put('/update', async (req, res) => {
+	
+	// ALSO NEED TO check user permissions
+	if (!req.body.point_type_id || req.body.point_type_id === "") {
+		const error = APIResponse.MissingRequiredParameters()
+		res.status(error.code).send(error.toJson())
+	}
+	else {
+
+		try {
+			const success = await createUser(req["user"]["user_id"], req.query.code, req.query.first, req.query.last)
+			res.status(success.code).send(success.toJson())
+		}
+		catch(suberror) {
+			if (suberror instanceof APIResponse){
+                res.status(suberror.code).send(suberror.toJson())
+            }
+            else {
+                console.log("FAILED WITH DB FROM user ERROR: "+ suberror)
+                const apiResponse = APIResponse.ServerError()
+                res.status(apiResponse.code).send(apiResponse.toJson())
+            }
+		}
+	}
+
+})

@@ -10,6 +10,7 @@ import { getUser } from '../src/GetUser'
 import { createUser } from '../src/CreateUser'
 import { isInDateRange } from '../src/IsInDateRange'
 import { getUserRank } from '../src/GetUserRank'
+import { getPointLogsForUser } from '../src/GetPointLogsForUser'
 
 if(admin.apps.length === 0){
 	admin.initializeApp(functions.config().firebase)
@@ -220,10 +221,21 @@ users_app.post('/submitPoint', async (req, res) => {
  * Any other errors you find while making this code
  * @throws 500 - ServerError
  */
-users_app.get('/points', (req, res) => {
-	//Create an async function in the src folder that takes the optional parameters and returns the appropriate list of point logs as a promise.
-	//look at user/get for an example of how to call these functions and look in the src folder for example functions. (GetRewardById.ts should be helpful)
+users_app.get('/points', async (req, res) => {
+	try {
+		const user = await getUser(req["user"]["user_id"])
+		const pointLogs = await getPointLogsForUser(user.id, user.house)
+		res.status(APIResponse.SUCCESS_CODE).send(JSON.stringify(pointLogs))
+	}
+	catch(error) {
+		if (error instanceof APIResponse) {
+			res.status(error.code).send(error.toJson())
+		}
+		else {
+			console.log("FAILED WITH DB FROM user ERROR: " + error)
+			const apiResponse = APIResponse.ServerError()
+			res.status(apiResponse.code).send(apiResponse.toJson())
+		}
+	}
 
-	//To find the userid, you will have to find examples above that look in the request object to find the id.
-	
 })
