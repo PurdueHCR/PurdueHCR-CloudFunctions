@@ -153,6 +153,14 @@ export class APIResponse{
     }
 
     /**
+     * 426 - Incorrect Format
+     * One or more fields provided were in an invalid format to save in the database
+     */
+    static IncorrectFormat(): APIResponse {
+        return new APIResponse(426, "Data provided is in the incorrect format.")
+    }
+
+    /**
      * 500 - Server Error
      * Unknown Firebase Firestore error
      */

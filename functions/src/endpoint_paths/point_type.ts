@@ -5,10 +5,8 @@ import * as bodyParser from "body-parser"
 import { getUser } from '../src/GetUser'
 import { APIResponse } from '../models/APIResponse'
 import { getUserPointTypes } from '../src/getUserPointTypes'
-import { APIResponse } from '../models/APIResponse'
-import { HouseCompetition } from '../models/HouseCompetition'
+import { updatePointType } from '../src/UpdatePointType'
 import { PointType } from '../models/PointType'
-import { User} from '../models/User'
 import { UserPermissionLevel } from '../models/UserPermissionLevel'
 
 
@@ -73,32 +71,52 @@ pt_app.get('/get', async (req, res) => {
  * 
  * @throws  400 - UserDoesNotExist
  * @throws  401 - Unauthorized
- * @throws  403 - 
+ * @throws  403 - InvalidPermissionLevel
  * @throws 	422 - MissingRequiredParameters
+ * @throws  426 - IncorrectFormat
  * @throws  500 - Server Error
  */
 pt_app.put('/update', async (req, res) => {
-	
-	// ALSO NEED TO check user permissions
-	if (!req.body.point_type_id || req.body.point_type_id === "") {
+	if (!req.query["id"]|| req.query["id"] === "") {
 		const error = APIResponse.MissingRequiredParameters()
 		res.status(error.code).send(error.toJson())
 	}
+	else if ((await getUser(req["user"]["uid"])).permissionLevel != UserPermissionLevel.PROFESSIONAL_STAFF) {
+		console.log((await getUser(req["user"]["uid"])).permissionLevel)
+		const error = APIResponse.InvalidPermissionLevel()
+		res.status(error.code).send(error.toJson())
+	}
 	else {
-
-		try {
-			const success = await createUser(req["user"]["user_id"], req.query.code, req.query.first, req.query.last)
-			res.status(success.code).send(success.toJson())
+		let matches = false;
+		for (let item in req.body) {
+			// Check that the values attempting to be updated confirm to the allowed values
+			const options = [PointType.DESCRIPTION, PointType.ENABLED, PointType.NAME,
+			  				 PointType.PERMISSION_LEVEL, PointType.RESIDENTS_CAN_SUBMIT, PointType.VALUE]
+			
+			options.forEach(function (opt, index) {
+				if (item === opt) {
+					matches = true
+				}
+			});
 		}
-		catch(suberror) {
-			if (suberror instanceof APIResponse){
-                res.status(suberror.code).send(suberror.toJson())
-            }
-            else {
-                console.log("FAILED WITH DB FROM user ERROR: "+ suberror)
-                const apiResponse = APIResponse.ServerError()
-                res.status(apiResponse.code).send(apiResponse.toJson())
-            }
+		if (!matches) {
+			const error = APIResponse.IncorrectFormat()
+			res.status(error.code).send(error.toJson())
+		} else {
+			try {
+				const success = await updatePointType(req.query["id"], req.body)
+				res.status(success.code).send(success.toJson())
+			}
+			catch(suberror) {
+				if (suberror instanceof APIResponse){
+					res.status(suberror.code).send(suberror.toJson())
+				}
+				else {
+					console.log("FAILED WITH DB FROM user ERROR: "+ suberror)
+					const apiResponse = APIResponse.ServerError()
+					res.status(apiResponse.code).send(apiResponse.toJson())
+				}
+			}
 		}
 	}
 
