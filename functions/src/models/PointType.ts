@@ -31,17 +31,22 @@ export class PointType{
     static fromQuerySnapshot(snapshot: FirebaseFirestore.QuerySnapshot): PointType[]{
         const types: PointType[] = []
         for( const document of snapshot.docs){
-            types.push(this.fromData(document.data()))
+            types.push(this.fromData(document.id, document.data()))
         }
         return types;
     }
 
     static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): PointType{
-        return this.fromData(document.data()!);
+        return this.fromData(document.id, document.data()!);
     }
 
-    private static fromData(document: FirebaseFirestore.DocumentData){
-        const id = document.id;
+    /**
+     * 
+     * @param documentId Required because DocumentData.id is null
+     * @param document 
+     */
+    private static fromData(documentId: String, document: FirebaseFirestore.DocumentData){
+        const id = documentId;
         let  description = ""
         let enabled = false
         let name = ""

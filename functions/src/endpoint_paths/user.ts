@@ -11,11 +11,10 @@ import { createUser } from '../src/CreateUser'
 import { isInDateRange } from '../src/IsInDateRange'
 import { getUserRank } from '../src/GetUserRank'
 import { getPointLogsForUser } from '../src/GetPointLogsForUser'
+import Database from '../Database'
 
-if(admin.apps.length === 0){
-	admin.initializeApp(functions.config().firebase)
-}
-const db = admin.firestore()
+
+const db = Database.getInstance().getDb()
 const users_app = express()
 const cors = require('cors')
 const users_main = express()
@@ -31,7 +30,6 @@ export const user_main = functions.https.onRequest(users_main)
 
 users_app.use(cors({origin:true}))
 users_app.use(firestoreTools.validateFirebaseIdToken)
-
 
 /**
  * @deprecated DONT USE THIS EVER... please
@@ -110,7 +108,7 @@ users_app.post('/create', async (req, res) => {
 	}
 	else{
 		try{
-			const success = await createUser(req["user"]["user_id"], req.query.code, req.query.first, req.query.last)
+			const success = await createUser(req["user"]["user_id"], req.query.code as string, req.query.first as string, req.query.last as string)
 			res.status(success.code).send(success.toJson())
 		}
 		catch(suberror){

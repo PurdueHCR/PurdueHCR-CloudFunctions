@@ -40,7 +40,7 @@ reward_app.use(firestoreTools.validateFirebaseIdToken)
 reward_app.get('/get', async (req, res) =>{
     try{
         if(req.query.id && req.query.id !== ""){
-            const reward = await getRewardById(req.query.id)
+            const reward = await getRewardById(req.query.id as string)
             res.status(APIResponse.SUCCESS_CODE).send(reward.toJson())
         }
         else {

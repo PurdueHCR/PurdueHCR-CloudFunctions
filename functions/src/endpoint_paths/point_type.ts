@@ -5,11 +5,7 @@ import * as bodyParser from "body-parser"
 import { getUser } from '../src/GetUser'
 import { APIResponse } from '../models/APIResponse'
 import { getUserPointTypes } from '../src/getUserPointTypes'
-import { APIResponse } from '../models/APIResponse'
-import { HouseCompetition } from '../models/HouseCompetition'
-import { PointType } from '../models/PointType'
-import { User} from '../models/User'
-import { UserPermissionLevel } from '../models/UserPermissionLevel'
+import { createUser } from '../src/CreateUser'
 
 
 //Make sure that the app is only initialized one time 
@@ -87,7 +83,7 @@ pt_app.put('/update', async (req, res) => {
 	else {
 
 		try {
-			const success = await createUser(req["user"]["user_id"], req.query.code, req.query.first, req.query.last)
+			const success = await createUser(req["user"]["user_id"], req.query.code as string, req.query.first as string, req.query.last as string)
 			res.status(success.code).send(success.toJson())
 		}
 		catch(suberror) {

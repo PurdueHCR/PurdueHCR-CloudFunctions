@@ -51,7 +51,7 @@ export async function addPoints(points: number, house_name: string, user_id?: st
 	}
 	catch(error){
 		const apiError = APIResponse.ServerError()
-		Promise.reject(apiError)
+		return Promise.reject(apiError)
 	}
 	
 }
