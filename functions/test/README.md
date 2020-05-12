@@ -49,7 +49,3 @@ How to install Firebase emulator
         - Y
 
 
-
-** important thing to know is that to test the endpoints you need to run 
-    ```export FIRESTORE_EMULATOR_HOST=localhost:8080```
-    This env is a location that will tell the emulator where to look for firestore. If you are trying to run with prod, you have to run ```unset FIRESTORE_EMULATOR_HOST```
