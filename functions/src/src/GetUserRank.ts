@@ -25,11 +25,11 @@ export async function getUserRank(user_id: string): Promise<UserRank> {
     }
 
     houseUsers.sort((a:User, b:User) => {
-        return (b.totalPoints -  b.lastSemesterPoints) - (a.totalPoints - a.lastSemesterPoints)
+        return b.semesterPoints - a.semesterPoints
     })
 
     let semesterRank = 1
-    while(semesterRank <= houseUsers.length && houseUsers[semesterRank-1].totalPoints !== user.totalPoints){
+    while(semesterRank <= houseUsers.length && houseUsers[semesterRank-1].semesterPoints >= user.semesterPoints){
         semesterRank ++
     }
     return Promise.resolve(new UserRank(houseRank, semesterRank))

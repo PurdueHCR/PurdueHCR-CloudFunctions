@@ -43,6 +43,7 @@ export async function addPoints(points: number, house_name: string, user_id?: st
 			//If user id was provided, add points to user and update in database
 			if(user_id && user_id !== "" && user !== null){
 				user.totalPoints += rounded_points
+				user.semesterPoints += rounded_points
 				transaction.update(db.collection(HouseCompetition.USERS_KEY).doc(user_id), user.toPointUpdateJson())
 			}
 		})

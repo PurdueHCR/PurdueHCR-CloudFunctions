@@ -26,6 +26,15 @@ export declare type HouseOptions = {
     total_points?: number
 }
 
+export declare type UserOptions = {
+    first?:string, 
+    floor_id?:string,
+    house_name?:string,
+    last?:string,
+    semester_points?:number,
+    total_points?:number
+}
+
 export class FirestoreDataFactory{
 
     static systemPreference(db:firebase.firestore.Firestore, spOpts?:SystemPreferenceOptions): Promise<void>{
@@ -57,6 +66,18 @@ export class FirestoreDataFactory{
             "Color":(hOpts && hOpts.color)? hOpts!.color: "#5AC0C7",
             "NumberOfResidents":(hOpts && hOpts.num_residents)? hOpts.num_residents: 200,
             "TotalPoints":(hOpts && hOpts.total_points)? hOpts.total_points: 20
+        })
+    }
+
+    static createUser(db: firebase.firestore.Firestore, id: string, permission_level: number, uOpts?:UserOptions): Promise<void> {
+        return db.collection("Users").doc(id).set({
+            "FirstName":(uOpts && uOpts.first)? uOpts.first: "TEST_FIRST", 
+            "FloorID":(uOpts && uOpts.floor_id)? uOpts.floor_id:"4N",
+            "House":(uOpts && uOpts.house_name)? uOpts.house_name:"Platinum",
+            "LastName":(uOpts && uOpts.last)? uOpts.last:"TEST_LAST",
+            "SemesterPoints":(uOpts && uOpts.semester_points)? uOpts.semester_points:0,
+            "Permission Level":permission_level, 
+            "TotalPoints":(uOpts && uOpts.total_points)? uOpts.total_points:0
         })
     }
 }

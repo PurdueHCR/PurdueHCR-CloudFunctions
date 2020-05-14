@@ -55,9 +55,9 @@ describe('user/submitpoint', () =>{
         
         user_func = require('../../../src/endpoint_paths/index.ts').user
 
-        await db.collection("Users").doc("RESIDENT").set({"FirstName":"TEST_FIRST", "FloorID":"4N","House":"Platinum","LastName":"TEST_LAST","LastSemesterPoints":25,"Permission Level":0, "TotalPoints":31})
-        await db.collection("Users").doc("rec").set({"FirstName":"TEST_FIRST", "FloorID":"4N","House":"Platinum","LastName":"TEST_LAST","LastSemesterPoints":25,"Permission Level":2, "TotalPoints":31})
-        await db.collection("Users").doc("RHP").set({"FirstName":"TEST_FIRST_RHP", "FloorID":"4N","House":"Platinum","LastName":"TEST_LAST_RHP","LastSemesterPoints":25,"Permission Level":1, "TotalPoints":31})
+        await FirestoreDataFactory.createUser(db, "RESIDENT", 0)
+        await FirestoreDataFactory.createUser(db, "REC", 2)
+        await FirestoreDataFactory.createUser(db, "RHP", 1)
         await FirestoreDataFactory.createPointType(db, 1)
         await FirestoreDataFactory.createPointType(db, 2, {residents_can_submit: false})
         await FirestoreDataFactory.createHouse(db, "Platinum")
@@ -70,11 +70,12 @@ describe('user/submitpoint', () =>{
     //Test GetUserSuccess. Ensure a user is correctly returned
     it('Missing Body', async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", {})
-        res.expect(422).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(422)
                 done()
             }
         })
@@ -83,11 +84,12 @@ describe('user/submitpoint', () =>{
 
     it('Missing Date Occured', async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", {"point_type_id":1, "description":"test"})
-        res.expect(422).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(422)
                 done()
             }
         })
@@ -95,11 +97,12 @@ describe('user/submitpoint', () =>{
 
     it('Missing Description', async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", {"point_type_id":1, "date_occurred":"4/1/2020"})
-        res.expect(422).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(422)
                 done()
             }
         })
@@ -107,11 +110,12 @@ describe('user/submitpoint', () =>{
 
     it('Missing Point Type Id', async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", {"date_occurred":"4/1/2020", "description":"test"})
-        res.expect(422).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(422)
                 done()
             }
         })
@@ -119,23 +123,25 @@ describe('user/submitpoint', () =>{
 
     it('Invalid Point Type', async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(0,"test",( new Date()).toString()))
-        res.expect(417).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(417)
                 done()
             }
         })
     })
 
     it('Invalid User Permissions', async(done) => {
-        const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,"test",( new Date()).toString()), "Bearer rec")
-        res.expect(403).end(function (err, res) {
+        const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,"test",( new Date()).toString()), "Bearer REC")
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(403)
                 done()
             }
         })
@@ -144,11 +150,12 @@ describe('user/submitpoint', () =>{
     it('Competition Disabled',  async(done) => {
         await FirestoreDataFactory.systemPreference(db, {is_house_enabled: false})
         const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,"test",( new Date()).toString()))
-        res.expect(412).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(412)
                 done()
             }
         })
@@ -156,11 +163,12 @@ describe('user/submitpoint', () =>{
 
     it('Residents Cant Submit',  async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(2,"test",( new Date()).toString()))
-        res.expect(419).end(function (err, res) {
+        res.end(function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(419)
                 done()
             }
         })
@@ -171,23 +179,25 @@ describe('user/submitpoint', () =>{
         const descr = "Resident Submission Success test"
         console.log(date.toString())
         const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,descr,date.toString()), "Bearer RESIDENT")
-        res.expect(201).end(async function (err, res) {
+        res.end(async function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(201)
+
                 let documents = await db.collection("House").doc("Platinum").collection("Points").where("Description","==","Resident Submission Success test").limit(1).get()
-                expect(documents.docs[0].data()["ApprovedOn"]).toBeUndefined()
-                expect(new Date(documents.docs[0].data()["DateOccurred"].seconds)).toBeTruthy()
-                expect(documents.docs[0].data()["DateSubmitted"]).toBeTruthy()
-                expect(documents.docs[0].data()["Description"]).toEqual(descr)
-                expect(documents.docs[0].data()["FloorID"]).toEqual("4N")
-                expect(documents.docs[0].data()["PointTypeID"]).toEqual(-1)
-                expect(documents.docs[0].data()["RHPNotifications"]).toEqual(0)
-                expect(documents.docs[0].data()["ResidentFirstName"]).toEqual("TEST_FIRST")
-                expect(documents.docs[0].data()["ResidentId"]).toEqual("RESIDENT")
-                expect(documents.docs[0].data()["ResidentLastName"]).toEqual("TEST_LAST")
-                expect(documents.docs[0].data()["ResidentNotifications"]).toEqual(0)
+                expect(documents.docs[0].data().ApprovedOn).toBeUndefined()
+                expect(new Date(documents.docs[0].data().DateOccurred.seconds)).toBeTruthy()
+                expect(documents.docs[0].data().DateSubmitted).toBeTruthy()
+                expect(documents.docs[0].data().Description).toEqual(descr)
+                expect(documents.docs[0].data().FloorID).toEqual("4N")
+                expect(documents.docs[0].data().PointTypeID).toEqual(-1)
+                expect(documents.docs[0].data().RHPNotifications).toEqual(0)
+                expect(documents.docs[0].data().ResidentFirstName).toEqual("TEST_FIRST")
+                expect(documents.docs[0].data().ResidentId).toEqual("RESIDENT")
+                expect(documents.docs[0].data().ResidentLastName).toEqual("TEST_LAST")
+                expect(documents.docs[0].data().ResidentNotifications).toEqual(0)
                 done();
             }
         })
@@ -196,26 +206,48 @@ describe('user/submitpoint', () =>{
     it('RHP Submission Success', async(done) =>{
         const date = new Date()
         const descr = "RHP Submission Success test"
-        console.log(date.toString())
+        const prevScore = 11
+        const prevUserPoints = 14
+        const semPoints = 4;
+        await FirestoreDataFactory.createHouse(db, "Platinum", {total_points: prevScore})
+        await FirestoreDataFactory.createUser(db, "RHP", 1, {total_points: prevUserPoints, semester_points: semPoints})
+
         const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,descr,date.toString()), "Bearer RHP")
-        res.expect(202).end(async function (err, res) {
+        res.end(async function (err, res) {
             if(err){
                 done(err)
             }
             else{
+                expect(res.status).toBe(202)
+
                 let documents = await db.collection("House").doc("Platinum").collection("Points").where("Description","==","RHP Submission Success test").limit(1).get()
-                expect(documents.docs[0].data()["ApprovedOn"]).toBeTruthy()
-                expect(documents.docs[0].data()["ApprovedBy"]).toEqual("Preapproved")
-                expect(new Date(documents.docs[0].data()["DateOccurred"].seconds)).toBeTruthy()
-                expect(documents.docs[0].data()["DateSubmitted"]).toBeTruthy()
-                expect(documents.docs[0].data()["Description"]).toEqual(descr)
-                expect(documents.docs[0].data()["FloorID"]).toEqual("4N")
-                expect(documents.docs[0].data()["PointTypeID"]).toEqual(1)
-                expect(documents.docs[0].data()["RHPNotifications"]).toEqual(0)
-                expect(documents.docs[0].data()["ResidentFirstName"]).toEqual("TEST_FIRST_RHP")
-                expect(documents.docs[0].data()["ResidentId"]).toEqual("RHP")
-                expect(documents.docs[0].data()["ResidentLastName"]).toEqual("TEST_LAST_RHP")
-                expect(documents.docs[0].data()["ResidentNotifications"]).toEqual(0)
+                expect(documents.docs[0].data().ApprovedOn).toBeTruthy()
+                expect(documents.docs[0].data().ApprovedBy).toEqual("Preapproved")
+                expect(new Date(documents.docs[0].data().DateOccurred.seconds)).toBeTruthy()
+                expect(documents.docs[0].data().DateSubmitted).toBeTruthy()
+                expect(documents.docs[0].data().Description).toEqual(descr)
+                expect(documents.docs[0].data().FloorID).toEqual("4N")
+                expect(documents.docs[0].data().PointTypeID).toEqual(1)
+                expect(documents.docs[0].data().RHPNotifications).toEqual(0)
+                expect(documents.docs[0].data().ResidentFirstName).toEqual("TEST_FIRST")
+                expect(documents.docs[0].data().ResidentId).toEqual("RHP")
+                expect(documents.docs[0].data().ResidentLastName).toEqual("TEST_LAST")
+                expect(documents.docs[0].data().ResidentNotifications).toEqual(0)
+
+                let houseDoc = await db.collection("House").doc("Platinum").get()
+                expect(houseDoc.data()!.TotalPoints).toBe(prevScore + 1)
+
+                let userDoc = await db.collection("Users").doc("RHP").get()
+                expect(userDoc.data()!.TotalPoints).toBe(prevUserPoints + 1)
+                expect(userDoc.data()!.SemesterPoints).toBe(semPoints + 1)
+
+                let messageDocs = await db.collection("House").doc("Platinum").collection("Points").doc(documents.docs[0].id).collection("Messages").get()
+                expect(messageDocs.docs[0].data().Message).toBe("Preapproved")
+                expect(messageDocs.docs[0].data().MessageType).toBe("approve")
+                expect(messageDocs.docs[0].data().SenderFirstName).toBe("PurdueHCR")
+                expect(messageDocs.docs[0].data().SenderLastName).toBe("")
+                expect(messageDocs.docs[0].data().SenderPermissionLevel).toBe(1)
+
                 done();
             }
         })
