@@ -37,7 +37,7 @@ export class Reward {
     }
 
     private static fromData(document: FirebaseFirestore.DocumentData): Reward {
-        let id = document.id
+        const id = document.id
         let fileName: string
         let requiredPPR: number
         let requiredValue: number

@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as express from 'express'
-import * as bodyParser from "body-parser"
 import {createSaveSemesterPointsEmail} from "../email_functions/SaveSemesterPointsEmail"
 import {createResetHouseCompetitionEmail} from "../email_functions/ResetHouseCompetitionEmail"
 import { PointType } from '../models/PointType'
@@ -35,8 +34,8 @@ const nodemailer = require('nodemailer')
 const firestoreTools = require('../firestoreTools')
 
 comp_main.use(comp_app)
-comp_main.use(bodyParser.json())
-comp_main.use(bodyParser.urlencoded({ extended: false }))
+comp_app.use(express.json())
+comp_app.use(express.urlencoded({ extended: false }))
 
 
 
@@ -169,7 +168,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 						const ref = db.collection(HouseCompetition.USERS_KEY).doc(listOfUserSnapshots.docs[i].id)
 						const user = users[i]
 						let userNewPointsSinceDate:number = 0
-						if(user.house != null && user.house !== "" && usersByHouse[user.house.toString()] != null && usersByHouse[user.house.toString()][user.id.toString()] != null){
+						if(user.house !== null && user.house !== "" && usersByHouse[user.house.toString()] !== null && usersByHouse[user.house.toString()][user.id.toString()] !== null){
 							userNewPointsSinceDate = usersByHouse[user.house.toString()][user.id.toString()].points
 						}
 						batch.update(ref, {LastSemesterPoints: user.totalPoints - userNewPointsSinceDate})
@@ -348,7 +347,7 @@ function getUserPointsFromDate(house:string, pts:PointType[], date:Date){
 						let assigned = false
 
 
-						if(usersFromUserID[pl.residentId.toString()] != null){
+						if(usersFromUserID[pl.residentId.toString()] !== null){
 							//console.log("WE GOT ONE!!!!!: "+pl.residentFirstName + " "+pl.residentLastName)
 							assigned = true
 							usersFromUserID[pl.residentId.toString()].addLog(pl, ptIterator.value)

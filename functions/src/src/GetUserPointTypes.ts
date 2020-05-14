@@ -15,7 +15,7 @@ export async function getUserPointTypes(user:User) : Promise<PointType[]> {
 		const pts = await getPointTypes()
 		const user_pts: PointType[] = []
 		pts.forEach((point_type) =>{
-			if(point_type.permissionLevel == UserPermissionLevel.PROFESSIONAL_STAFF){
+			if(point_type.permissionLevel === UserPermissionLevel.PROFESSIONAL_STAFF){
 				user_pts.push(point_type)
 			}
 			else if (point_type.enabled){
