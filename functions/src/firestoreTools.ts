@@ -44,7 +44,7 @@ const validateFirebaseIdToken = async (req, res , next) => {
 
   	let idToken
   	if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    	// Read the ID Token from the Authorization header.
+		// Read the ID Token from the Authorization header.
     	idToken = req.headers.authorization.split('Bearer ')[1]
   	} else if(req.cookies) {
     	// Read the ID Token from cookie.
@@ -63,7 +63,7 @@ const validateFirebaseIdToken = async (req, res , next) => {
     	next()
     	return
   	} catch (error) {
-    	console.error('Error while verifying Firebase ID token:', error)
+    	console.error('Error while verifying Firebase ID token: ', idToken, " ", error)
     	const apiError = APIResponse.Unauthorized()
     	res.status(apiError.code).send(apiError.toJson())
     	return

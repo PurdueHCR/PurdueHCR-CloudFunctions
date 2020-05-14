@@ -58,3 +58,7 @@ Q&A - A section to record solutions to problems that were encountered while test
 
 When I found this problem when doing integration tests for user/submitPoint the reason was because in the HTTPSFunction (src/endpoint_paths/user.ts) I had users_main.use(body-parser.json()) and users_main.use(body-parser.urlencoded({ extended: false})). Instead of using the _main variable, use the _app and replace body-parser with express. The end results that fixed mine were users_app.use(express.json())
 users_app.use(express.urlencoded({ extended: true })) 
+
+-Question: When running integration test, all tests are returning 401 errors.
+
+Double check that your integration test mocks firebase-admin in the beforeAll part of the test and make sure that you define the function you are testing underneath your mocking of the firebase-admin. If you import you function from index.ts before you mock the fb-admin your test will not handle token validation correctly. Alternativley add print statements in firestoreTools.ts to see what the tokens are when you run your tests

@@ -1,65 +1,72 @@
 import * as factory from '../../HTTPRequestFactory'
 import * as firebase from "@firebase/testing";
-let user_func = require('../../../src/endpoint_paths/index.ts').user
+import * as IntegrationMockFactory from '../IntegrationMockFactory'
+import {FirestoreDataFactory} from '../FirestoreDataFactory'
 
-
-jest.mock('firebase-admin', () => ({
-    apps: {
-        length: 1
-    },
-
-    auth: () => { return {verifyIdToken: (token) => {
-        console.log("TOKEN: "+token)
-        if(token == "1"){
-            return {"user_id":"hello"}
-        }
-        else{
-            throw Error("Invalid Token")
-        }
-        
-    } }},
-
-    //This mocks admin.initializeApp() so whenever the app calls initializeApp(),
-    //it will run jest.fn() which is an empty function
-    initializeApp: () => {
-        jest.fn()
-    },
-
-    //Mocks admin.firestore() Which is often saved as db
-    firestore: () => {
-        return authedApp()
-    }
-}))
+let user_func
+const RESIDENT_ID = "RESIDENT"
 
 //Test Suite GetUser
 describe('user/get', () =>{
 
-    beforeAll(() => {
-        
+    beforeAll(async () => {
+        IntegrationMockFactory.mockFirebaseAdmin()
+        const db = IntegrationMockFactory.getDb()
+
+        user_func = require('../../../src/endpoint_paths/index.ts').user
+
+        await FirestoreDataFactory.setUser(db, RESIDENT_ID, 0)
     })
 
     //Test Unknown User
-    it('Unknown User', async() => {
-        const res = await factory.get(user_func, "/get")
-        expect(res.status).toEqual(400)
+    it('Unknown User', (done) => {
+        const res = factory.get(user_func, "/get", "BADID")
+        res.end(function (err, res) {
+            if(err){
+                done(err)
+            }
+            else{
+                expect(res.status).toBe(400)
+                done()
+            }
+        })
     })
 
     //Test Unknown User
-    it('Bad Token', async() => {
-        const res = await factory.get(user_func, "/get", "Bearer 44")
-        expect(res.status).toEqual(401)
+    it('Bad Token', (done) => {
+        const res = factory.get(user_func, "/get", "INVALIDID")
+        res.end(function (err, res) {
+            if(err){
+                done(err)
+            }
+            else{
+                expect(res.status).toBe(401)
+                done()
+            }
+        })
     })
 
+    //Test that it successfully gets a user
+    it('Success Get User', (done) =>{
+        const res = factory.get(user_func, "/get", RESIDENT_ID)
+        res.end(function (err, res) {
+            if(err){
+                done(err)
+            }
+            else{
+                expect(res.status).toBe(200)
+
+                //TODO add expect statements to verify that the user is returned in full
+                done()
+            }
+        })
+    })
+
+    //After all of the tests are done, make sure to delete the test firestore app
     afterAll(()=>{
         Promise.all(firebase.apps().map(app => app.delete()))
     })
 
 })
 
-// // Helper function to setup the test db instance
-function authedApp() {
-    return firebase
-      .initializeTestApp({ projectId: 'test-project', auth: { uid: "Authorization"} })
-      .firestore();
-  }
 
