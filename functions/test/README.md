@@ -49,3 +49,12 @@ How to install Firebase emulator
         - Y
 
 
+
+
+
+Q&A - A section to record solutions to problems that were encountered while testing
+
+- Question: When running an integration test, the HTTPRequestFactory is not sending a body.
+
+When I found this problem when doing integration tests for user/submitPoint the reason was because in the HTTPSFunction (src/endpoint_paths/user.ts) I had users_main.use(body-parser.json()) and users_main.use(body-parser.urlencoded({ extended: false})). Instead of using the _main variable, use the _app and replace body-parser with express. The end results that fixed mine were users_app.use(express.json())
+users_app.use(express.urlencoded({ extended: true })) 

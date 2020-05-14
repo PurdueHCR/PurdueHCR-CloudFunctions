@@ -1,7 +1,7 @@
 import { User } from '../models/User'
 import { HouseCompetition } from '../models/HouseCompetition'
 import { APIResponse } from '../models/APIResponse'
-import Database from "../Database"
+import * as admin from "firebase-admin"
 
 /**
  * Get a user with an id
@@ -11,10 +11,8 @@ import Database from "../Database"
  * @throws 	500 - ServerError 
  */
 export async function getUser(id: string) : Promise<User> {
-	console.log("GETTING USER")
-	const db = Database.getInstance().getDb()
+	const db = admin.firestore()
 	try{
-		console.log("TRY")
 		const userDocument = await db.collection(HouseCompetition.USERS_KEY).doc(id).get()
 		if (!userDocument.exists) {
 			console.error("USER DOESNT EXIST")
@@ -22,7 +20,6 @@ export async function getUser(id: string) : Promise<User> {
 		}
 		else {
 			const user = User.fromDocumentSnapshot(userDocument)
-			console.log("GOT USER")
 			return Promise.resolve(user)
 		}
 	}

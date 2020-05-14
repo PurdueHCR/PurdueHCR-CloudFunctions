@@ -23,6 +23,12 @@ const user:{} = {
 //db.collection(string).doc(string).get()
 jest.mock('firebase-admin', () => ({
 
+    apps: {
+        length: 0
+    },
+
+    auth: () => {},
+
     //This mocks admin.initializeApp() so whenever the app calls initializeApp(),
     //it will run jest.fn() which is an empty function
     initializeApp: () => {
@@ -68,7 +74,6 @@ describe('GetUser', () =>{
     test('TestGetUserSuccess', async() => {
         const id =  "Test-User-ID";
         let result = await GetUser.getUser(id);
-        console.log(result.toString)
         expect(result.firstName).toBe("First name")
     })
 

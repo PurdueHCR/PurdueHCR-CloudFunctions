@@ -22,6 +22,7 @@ import { PointLogMessage } from '../models/PointLogMessage'
  * @throws 403 - This User does not have the correct permission levels.
  * @throws 409 - This Link Has Already Been Submitted
  * @throws 412 - House Competition Is Disabled
+ * @throws 417 - Unknown Point Type
  * @throws 418 - Point Type Is Disabled
  * @throws 419 - Users Can Not Self Submit This Point Type
  * @throws 500 - Server Error

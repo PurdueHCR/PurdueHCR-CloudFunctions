@@ -1,8 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as express from 'express'
-import * as bodyParser from "body-parser"
-import { HouseCompetition } from '../models/HouseCompetition'
+// import * as bodyParser from "body-parser"
 import { APIResponse } from '../models/APIResponse'
 import { UnsubmittedPointLog } from '../models/UnsubmittedPointLog'
 import { submitPoint } from '../src/SubmitPoints'
@@ -11,61 +10,25 @@ import { createUser } from '../src/CreateUser'
 import { isInDateRange } from '../src/IsInDateRange'
 import { getUserRank } from '../src/GetUserRank'
 import { getPointLogsForUser } from '../src/GetPointLogsForUser'
-import Database from '../Database'
 
+if(admin.apps.length === 0){
+	admin.initializeApp(functions.config().firebase)
+}
 
-const db = Database.getInstance().getDb()
 const users_app = express()
 const cors = require('cors')
 const users_main = express()
 
 users_main.use(users_app)
-users_main.use(bodyParser.json())
-users_main.use(bodyParser.urlencoded({ extended: false }))
+users_app.use(express.json())
+users_app.use(express.urlencoded({ extended: true }))
 
 const firestoreTools = require('../firestoreTools')
-
-export const user_main = functions.https.onRequest(users_main)
 
 
 users_app.use(cors({origin:true}))
 users_app.use(firestoreTools.validateFirebaseIdToken)
 
-/**
- * @deprecated DONT USE THIS EVER... please
- */
-users_app.get('/rank',  (req,res) => {
-	//Get user id. Check the house. Get the rank of the user
-	const userId = req.header('User-Auth')
-	if(userId === "" || userId === undefined){
-		res.status(401).send("Missing Authorization")
-	}
-	db.collection(HouseCompetition.USERS_KEY).doc(userId!).get()
-	.then(userDocument => {
-		if(userDocument.exists ){
-			const houseName = userDocument.data()!.House
-			db.collection(HouseCompetition.USERS_KEY)
-			.where('House', '==', houseName)
-				.get()
-				.then(snapshot => {
-					snapshot.docs.sort((u1,u2) => u2.data().TotalPoints - u1.data().TotalPoints)
-					let i = 1
-					while(i <= snapshot.docs.length && snapshot.docs[i-1].data().TotalPoints !== userDocument.data()!.TotalPoints){
-						i ++
-					}
-					res.status(200).send(""+i)
-				}
-			).catch(err => {
-				res.status(400).send(res)
-			})
-		}
-		else{
-			res.status(400).send("Could not find the user with Id: "+userId)
-		}
-	})
-	.catch(err => res.send(500).send(res))
-	
-})
 
 /**
  * Get the houseRank and semesterRank for the requesting user
@@ -161,9 +124,24 @@ users_app.get('/get', async (req, res) => {
  * @throws  500 - Server Error
  */
 users_app.post('/submitPoint', async (req, res) => {
-
-	if(!req.body.point_type_id ||  req.body.point_type_id === "" || !req.body.description ||
+	if(!req.body || !req.body.point_type_id ||  req.body.point_type_id === "" || !req.body.description ||
 	 req.body.description === "" || !req.body.date_occurred || req.body.date_occurred === ""){
+		 if(!req.body){
+			console.error("Missing Body")
+		 }
+		 else if(!req.body.point_type_id ||  req.body.point_type_id === "" ){
+			console.error("Missing point_type_id")
+		 }
+		 else if(!req.body.description || req.body.description === ""){
+			console.error("Missing description")
+		 }
+		 else if(!req.body.date_occurred || req.body.date_occurred === ""){
+			console.error("Missing date_occurred")
+		 }
+		 else{
+			 console.error("Unkown missing parameter??? This shouldnt be called")
+		 }
+
 		const error = APIResponse.MissingRequiredParameters()
 		res.status(error.code).send(error.toJson())
 	}
@@ -237,3 +215,6 @@ users_app.get('/points', async (req, res) => {
 	}
 
 })
+
+
+export const user_main = functions.https.onRequest(users_main)
