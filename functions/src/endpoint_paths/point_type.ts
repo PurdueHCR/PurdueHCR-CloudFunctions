@@ -104,7 +104,7 @@ pt_app.put('/update', async (req, res) => {
 			res.status(error.code).send(error.toJson())
 		} else {
 			try {
-				const success = await updatePointType(req.query["id"], req.body)
+				const success = await updatePointType(req.query["id"].toString(), req.body)
 				res.status(success.code).send(success.toJson())
 			}
 			catch(suberror) {

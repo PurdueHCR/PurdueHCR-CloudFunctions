@@ -8,25 +8,25 @@ export class User {
     static HOUSE = "House"
     static LAST_NAME = "LastName"
     static PERMISSION_LEVEL = "Permission Level"
-    static LAST_SEMESTER_POINTS = "LastSemesterPoints"
+    static SEMESTER_POINTS = "SemesterPoints"
     static TOTAL_POINTS = "TotalPoints"
 
     firstName: string
     floorId: string
     house: string
     lastName: string
-    lastSemesterPoints: number
+    semesterPoints: number
     permissionLevel: UserPermissionLevel
     totalPoints: number
     id: string
 
     constructor(firstName:string, floorId:string, house: string, lastName: string, 
-        lastSemesterPoints: number, permissionLevel: UserPermissionLevel, totalPoints: number, id:string){
+        semesterPoints: number, permissionLevel: UserPermissionLevel, totalPoints: number, id:string){
             this.firstName = firstName
             this.floorId = floorId
             this.house = house
             this.lastName = lastName
-            this.lastSemesterPoints = lastSemesterPoints
+            this.semesterPoints = semesterPoints
             this.permissionLevel = permissionLevel
             this.totalPoints = totalPoints
             this.id = id
@@ -73,7 +73,7 @@ export class User {
         let floorId: string
         let house: string
         let lastName: string
-        let lastSemesterPoints: number
+        let semesterPoints: number
         let permissionLevel: UserPermissionLevel
         let totalPoints: number
         let id: string
@@ -109,11 +109,11 @@ export class User {
             lastName = ""
         }
         
-        if( User.LAST_SEMESTER_POINTS in documentData){
-            lastSemesterPoints = documentData[User.LAST_SEMESTER_POINTS]
+        if( User.SEMESTER_POINTS in documentData){
+            semesterPoints = documentData[User.SEMESTER_POINTS]
         }
         else{
-            lastSemesterPoints = -1
+            semesterPoints = 0
         }
 
         if( User.PERMISSION_LEVEL in documentData){
@@ -127,10 +127,10 @@ export class User {
             totalPoints = documentData[User.TOTAL_POINTS]
         }
         else{
-            totalPoints = -1
+            totalPoints = 0
         }
         return new User(firstName,floorId,house,lastName
-            ,lastSemesterPoints,permissionLevel,totalPoints,id)
+            ,semesterPoints,permissionLevel,totalPoints,id)
     }
 
     toFirestoreJson(){
@@ -141,7 +141,7 @@ export class User {
         data[User.LAST_NAME] = this.lastName
         data[User.PERMISSION_LEVEL] = this.permissionLevel
         data[User.TOTAL_POINTS] = this.totalPoints
-        data[User.LAST_SEMESTER_POINTS] = this.lastSemesterPoints
+        data[User.SEMESTER_POINTS] = this.semesterPoints
         
         return data
     }
@@ -155,7 +155,7 @@ export class User {
         data[User.LAST_NAME] = this.lastName
         data[User.PERMISSION_LEVEL] = this.permissionLevel
         data[User.TOTAL_POINTS] = this.totalPoints
-        data[User.LAST_SEMESTER_POINTS] = this.lastSemesterPoints
+        data[User.SEMESTER_POINTS] = this.semesterPoints
         
         return data
     }
@@ -164,6 +164,7 @@ export class User {
     toPointUpdateJson() {
         const data = {}
         data[User.TOTAL_POINTS] = this.totalPoints
+        data[User.SEMESTER_POINTS] = this.semesterPoints
         return data
     }
 

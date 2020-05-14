@@ -19,10 +19,10 @@ export class PointLog {
 
     //Approved variables may not be filled if the point log has not been approved yet, so the type is unified with null
     approvedBy: string | null
-    approvedOn: admin.firestore.Timestamp | null
+    approvedOn: Date | null
 
-    dateOccurred: admin.firestore.Timestamp
-    dateSubmitted: admin.firestore.Timestamp
+    dateOccurred: Date
+    dateSubmitted: Date
     description: string
     floorId: string
     pointTypeId: number
@@ -33,8 +33,8 @@ export class PointLog {
     residentNotifications: number
     id: string
 
-    constructor(id:string, approvedBy: string | null, approvedOn: admin.firestore.Timestamp | null, dateOccurred: admin.firestore.Timestamp,
-        dateSubmitted: admin.firestore.Timestamp, description: string, floorId: string, pointTypeId: number,
+    constructor(id:string, approvedBy: string | null, approvedOn: Date | null, dateOccurred: Date,
+        dateSubmitted: Date, description: string, floorId: string, pointTypeId: number,
         rhpNotifications: number, residentFirstName: string, residentId: string, residentLastName: string,
         residentNotifications: number) {
         this.id = id
@@ -71,7 +71,7 @@ export class PointLog {
         else {
             this.approvedBy = PointLog.PREAPPROVED_NAME
         }
-        this.approvedOn = admin.firestore.Timestamp.now()
+        this.approvedOn = new Date(Date.now())
 
         //Ensure that the point type id is positive. Negative implies the log is not approved yet
         this.pointTypeId = Math.abs(this.pointTypeId)
@@ -91,9 +91,9 @@ export class PointLog {
 
     private static fromData(document: admin.firestore.DocumentData): PointLog {
         let approvedBy: string | null
-        let approvedOn: admin.firestore.Timestamp | null
-        let dateOccurred: admin.firestore.Timestamp
-        let dateSubmitted: admin.firestore.Timestamp
+        let approvedOn: Date | null
+        let dateOccurred: Date
+        let dateSubmitted: Date
         let description: string
         let floorId: string
         let pointTypeId: number
@@ -139,8 +139,10 @@ export class PointLog {
 
     toFirebaseJSON() {
         const data = {}
-        data[PointLog.APPROVED_BY] = this.approvedBy
-        data[PointLog.APPROVED_ON] = this.approvedOn
+        if(this.approvedBy){
+            data[PointLog.APPROVED_BY] = this.approvedBy
+            data[PointLog.APPROVED_ON] = this.approvedOn
+        }        
         data[PointLog.DATE_OCCURRED] = this.dateOccurred
         data[PointLog.DATE_SUBMITTED] = this.dateSubmitted
         data[PointLog.DESCRIPTION] = this.description

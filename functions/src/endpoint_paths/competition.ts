@@ -136,7 +136,7 @@ comp_app.get('/secret-semester-points-set', (req, res) => {
 		.then(async pointTypeDocuments =>{
 			const pts = PointType.fromQuerySnapshot(pointTypeDocuments)
 
-			const date = new Date(Date.parse(req.query.date))
+			const date = new Date(Date.parse(req.query.date as string))
 			
 			//Get all the houses
 			db.collection(HouseCompetition.HOUSE_KEY).get().then(async housesSnapshot => {

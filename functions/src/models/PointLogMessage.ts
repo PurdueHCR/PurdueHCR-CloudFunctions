@@ -1,4 +1,3 @@
-import * as admin from 'firebase-admin'
 import { MessageType } from './MessageType'
 import { UserPermissionLevel } from './UserPermissionLevel'
 
@@ -10,14 +9,14 @@ export class PointLogMessage {
     static SENDER_LAST_NAME = "SenderLastName"
     static SENDER_PERMISSION_LEVEL = "SenderPermissionLevel"
 
-    creationDate: admin.firestore.Timestamp
+    creationDate: Date
     message: string
     messageType: MessageType
     senderFirstName: string
     senderLastName: string
     senderPermissionLevel: UserPermissionLevel
 
-    constructor(creationDate: admin.firestore.Timestamp, message: string, messageType: MessageType, 
+    constructor(creationDate: Date, message: string, messageType: MessageType, 
         senderFirstName: string, senderLastName: string, senderPermissionLevel: UserPermissionLevel){
             this.creationDate = creationDate
             this.message = message
@@ -39,7 +38,7 @@ export class PointLogMessage {
     }
 
     static getPreaprovedMessage(): PointLogMessage {
-        return new PointLogMessage(admin.firestore.Timestamp.now(), "Preapproved", MessageType.APPROVE, "PurdueHCR", "", UserPermissionLevel.RHP)
+        return new PointLogMessage(new Date(), "Preapproved", MessageType.APPROVE, "PurdueHCR", "", UserPermissionLevel.RHP)
     }
 
     static fromQueryDocumentSnapshot(queryDocument: FirebaseFirestore.QueryDocumentSnapshot): PointLogMessage {
@@ -47,7 +46,7 @@ export class PointLogMessage {
     }
 
     private static fromData(document: FirebaseFirestore.DocumentData): PointLogMessage {
-        let creationDate: admin.firestore.Timestamp
+        let creationDate: Date
         let message: string
         let messageType: MessageType
         let senderFirstName: string

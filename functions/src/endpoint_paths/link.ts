@@ -38,7 +38,7 @@ links_main.get('/getLink', (req, res) => {
         res.status(422).send("{\"message\": \"Missing required fields\"}");
     }
     else{
-        db.collection(HouseCompetition.LINKS_KEY).doc(req.query.id).get().then(linkDoc =>{
+        db.collection(HouseCompetition.LINKS_KEY).doc(req.query.id as string).get().then(linkDoc =>{
             if(linkDoc.exists){
                 const link = Link.fromSnapshotDocument(linkDoc);
                 res.status(200).send(link.toFirebaseJson())

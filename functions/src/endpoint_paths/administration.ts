@@ -112,8 +112,8 @@ admin_app.get('/house_submissions_from_date', (req, res) => {
     .then(async pointTypeDocuments =>{
         const pts  = PointType.fromQuerySnapshot(pointTypeDocuments)
 
-        const date = new Date(Date.parse(req.query.date))
-        db.collection(HouseCompetition.HOUSE_KEY).doc(req.query.house).collection('Points').where('DateSubmitted', '>', date).get()
+        const date = new Date(Date.parse(req.query.date as string))
+        db.collection(HouseCompetition.HOUSE_KEY).doc(req.query.house as string).collection('Points').where('DateSubmitted', '>', date).get()
         .then(async pointLogsSnapshot =>{
             
             //Create new list of users

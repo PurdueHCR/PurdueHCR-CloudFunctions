@@ -22,14 +22,14 @@ import { PointLogMessage } from '../models/PointLogMessage'
  * @throws 403 - This User does not have the correct permission levels.
  * @throws 409 - This Link Has Already Been Submitted
  * @throws 412 - House Competition Is Disabled
+ * @throws 417 - Unknown Point Type
  * @throws 418 - Point Type Is Disabled
  * @throws 419 - Users Can Not Self Submit This Point Type
  * @throws 500 - Server Error
  */
 export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGuaranteedApproval: boolean, documentId?: string | null): Promise<Boolean>{
 
-    const db = admin.firestore()
-
+	const db = admin.firestore()
 	const systemPreferences = await getSystemPreferences()
 	if (systemPreferences.isHouseEnabled) {
 		const pointType = await getPointTypeById(log.pointTypeId)
@@ -67,11 +67,14 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 					}
 
 				}
-				catch (err) {
-					console.log("Error From Writing PointLog. " + err)
+				catch (error) {
+					if(error instanceof APIResponse){
+						return Promise.reject(error)
+					}
+					console.error("Error From Writing PointLog. " + error)
 					return Promise.reject(new APIResponse(500, "Server Error"))
 				}
-				
+
 				//If the log is automatically approved, add points to the user and the house
 				if(isGuaranteedApproval || user.permissionLevel === UserPermissionLevel.RHP){
 					await submitPointLogMessage(user.house, log, PointLogMessage.getPreaprovedMessage())
@@ -81,6 +84,8 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 				else {
 					return Promise.resolve(false)
 				}
+					
+				
 			}
 			else {
 				return Promise.reject(APIResponse.InvalidPermissionLevel())
