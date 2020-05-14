@@ -3,26 +3,54 @@
 
 alias jest='./node_modules/.bin/jest'
 
-if [ "$1" = "-u" ]; then			
-	echo "Starting Unit Tests"                              		
-        jest --config ./jest.config.js test/functions/*.test.ts --silent
-elif [ "$1" = "-i" ]; then
-	echo "Starting Firestore emulator"
-        export FIRESTORE_EMULATOR_HOST=localhost:8080
-	firebase emulators:start --only firestore &> /dev/null &
-	sleep 2
-	echo "Starting Integration Tests"
-	jest --config ./jest.config.js test/endpoints/**/*.test.ts --runInBand --detectOpenHandles --forceExit --silent
-	pkill java
-elif [ "$1" = "-h" ]; then
-	echo "Run the tests using -u for unit tests or  -i for integration. No flag means run them all"
-else	
-	echo "Starting Firestore Emulator"
-	export FIRESTORE_EMULATOR_HOST=localhost:8080
-	firebase emulators:start --only firestore &> /dev/null &
-	sleep 2
-	echo "Starting Tests"
-	jest --config ./jest.config.js test/functions/*.test.ts test/endpoints/**/*.test.ts --runInBand --detectOpenHandles --forceExit --silent
-	pkill java 
+usage() { echo "Usage:  [args]\n\n-t\tRun either integration tests, unit tests, or a specific file\n<unit, integration, path_to_file>\n\n-v\tRun test in verbose mode. \n\nTo run a test with a specific file, an example is -t \"test/functions/GetUser.test.ts\". To run one test, declare it in the file as it.only or test.only" 1>&2; exit 1;}
+
+UNIT="/test\/functions\/.*\.test\.ts"
+INTEGRATION="/test\/endpoints\/.*\/.*\.test\.ts"
+TESTING="(?:$UNIT|$INTEGRATION)"
+SILENT=1
+LAUNCH_DATABASE=1
+
+while getopts ":hvt:" arg; do
+  case $arg in
+    h)
+      usage
+      ;;
+    v)
+      SILENT=0
+      ;;
+    t)
+      VALUE=${OPTARG}
+      if [ $VALUE = "unit" ]; then
+        LAUNCH_DATABASE=0
+	TESTING=$UNIT
+      elif [ $VALUE = "integration" ]; then
+	TESTING=$INTEGRATION
+      else
+	TESTING=$VALUE
+      fi
+      ;;
+  esac
+done
+
+if [ $LAUNCH_DATABASE -eq 1 ]; then
+  export FIRESTORE_EMULATOR_HOST=localhost:8080
+  echo "Starting Firebase Emulator"
+  firebase emulators:start --only firestore &> /dev/null &
+  sleep 2
 fi
-exit 0
+
+echo "Starting Tests"
+if [ $SILENT -eq 1 ]; then
+  jest --config ./jest.config.js "$TESTING" --detectOpenHandles --forceExit --silent
+else
+  echo "Verbose mode"
+  jest --config ./jest.config.js "$TESTING" --detectOpenHandles --forceExit
+fi
+
+if [ $LAUNCH_DATABASE -eq 1 ]; then
+  echo "Shutting Down Emulator"
+  pkill java
+  sleep 2
+fi
+

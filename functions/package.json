@@ -9,8 +9,8 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test": "zsh .test_script.zsh",
-    "unit": "zsh .test_script.zsh -u",
-    "integration": "zsh .test_script.zsh -i"
+    "unit": "zsh .test_script.zsh -t unit",
+    "integration": "zsh .test_script.zsh -t integration"
   },
   "main": "lib/endpoint_paths/index.js",
   "dependencies": {

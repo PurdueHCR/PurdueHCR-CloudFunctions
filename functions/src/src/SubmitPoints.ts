@@ -34,6 +34,7 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 	const systemPreferences = await getSystemPreferences()
 	if (systemPreferences.isHouseEnabled) {
 		const pointType = await getPointTypeById(log.pointTypeId)
+		console.log("PT: "+JSON.stringify(pointType))
 		if(pointType.enabled && pointType.residentCanSubmit){
 			const user = await getUser(userId)
 			if(user.canSubmitPoints()){
@@ -47,6 +48,7 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 					log.pointTypeId *= -1
 				}
 				try{
+					console.log("DOCID: "+documentId)
 					if(documentId && documentId !== ""){
 						//If a document ID is provided, check if the id exists, and if not, set in database
 						const doc = await db.collection(HouseCompetition.HOUSE_KEY).doc(user.house.toString())
@@ -55,12 +57,14 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 							return Promise.reject(APIResponse.LinkAlreadySubmitted())
 						}
 						else{
+							console.log("SET: ")
 							await db.collection(HouseCompetition.HOUSE_KEY).doc(user.house.toString())
 								.collection(HouseCompetition.HOUSE_COLLECTION_POINTS_KEY).doc(documentId).set(log.toFirebaseJSON())
 						}
 						log.id = documentId
 					}
 					else {
+						console.log("ADD: "+JSON.stringify(log.toFirebaseJSON()))
 						//No document id, so create new document in database
 						const document = await db.collection(HouseCompetition.HOUSE_KEY).doc(user.house.toString())
 													.collection(HouseCompetition.HOUSE_COLLECTION_POINTS_KEY).add(log.toFirebaseJSON())
@@ -69,7 +73,7 @@ export async function submitPoint(userId: string, log: UnsubmittedPointLog, isGu
 
 				}
 				catch (err) {
-					console.log("Error From Writing PointLog. " + err)
+					console.error("Error From Writing PointLog. " + err)
 					return Promise.reject(new APIResponse(500, "Server Error"))
 				}
 				

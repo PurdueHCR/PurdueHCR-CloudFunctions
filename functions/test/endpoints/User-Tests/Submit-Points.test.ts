@@ -6,12 +6,13 @@ import {FirestoreDataFactory} from '../FirestoreDataFactory'
 
 
 let user_func
+let db
 
 //Test Suite GetUser
 describe('user/submitpoint', () =>{
 
     beforeAll(async () => {
-        const db = authedApp()
+        db = authedApp()
         
         jest.mock('firebase-admin', () => {
 
@@ -56,12 +57,13 @@ describe('user/submitpoint', () =>{
 
         await db.collection("Users").doc("user_id").set({"FirstName":"Brian", "FloorID":"4N","House":"Platinum","LastName":"TESTED","LastSemesterPoints":25,"Name":"Brian TESTED","Permission Level":0, "TotalPoints":31})
         await db.collection("Users").doc("rec").set({"FirstName":"Brian", "FloorID":"4N","House":"Platinum","LastName":"TESTED","LastSemesterPoints":25,"Name":"Brian TESTED","Permission Level":2, "TotalPoints":31})
-        await FirestoreDataFactory.systemPreference(db)
+        
         await FirestoreDataFactory.createPointType(db, 1)
+        await FirestoreDataFactory.createPointType(db, 2, {residents_can_submit: false})
     })
 
-    beforeEach(() => {
-
+    beforeEach(async () => {
+        await FirestoreDataFactory.systemPreference(db)
     })
 
     //Test GetUserSuccess. Ensure a user is correctly returned
@@ -115,7 +117,7 @@ describe('user/submitpoint', () =>{
     })
 
     it('Invalid Point Type', async(done) => {
-        const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(0,"test",( new Date()).toString()), "Bearer rec")
+        const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(0,"test",( new Date()).toString()))
         res.expect(417).end(function (err, res) {
             if(err){
                 done(err)
@@ -129,6 +131,31 @@ describe('user/submitpoint', () =>{
     it('Invalid User Permissions', async(done) => {
         const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,"test",( new Date()).toString()), "Bearer rec")
         res.expect(403).end(function (err, res) {
+            if(err){
+                done(err)
+            }
+            else{
+                done()
+            }
+        })
+    })
+
+    it('Competition Disabled',  async(done) => {
+        await FirestoreDataFactory.systemPreference(db, {is_house_enabled: false})
+        const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(1,"test",( new Date()).toString()))
+        res.expect(412).end(function (err, res) {
+            if(err){
+                done(err)
+            }
+            else{
+                done()
+            }
+        })
+    })
+
+    it('Residents Cant Submit',  async(done) => {
+        const res: request.Test = factory.post(user_func, "/submitPoint", createPointLogBody(2,"test",( new Date()).toString()))
+        res.expect(419).end(function (err, res) {
             if(err){
                 done(err)
             }

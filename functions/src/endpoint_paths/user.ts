@@ -150,7 +150,7 @@ users_app.post('/submitPoint', async (req, res) => {
 		try{
 			const date_occurred = new Date(req.body.date_occurred)
 			if(isInDateRange(date_occurred)){
-				const log = new UnsubmittedPointLog(admin.firestore.Timestamp.fromDate(date_occurred), req.body.description, parseInt(req.body.point_type_id))
+				const log = new UnsubmittedPointLog(date_occurred, req.body.description, parseInt(req.body.point_type_id))
 				const didAddPoints = await submitPoint(req["user"]["user_id"], log, false)
 				const success = APIResponse.Success()
 				if(didAddPoints){
@@ -168,7 +168,7 @@ users_app.post('/submitPoint', async (req, res) => {
 			
 		}
 		catch(error){
-			console.log("FAILED WITH ERROR: "+ error.toString())
+			console.error("FAILED WITH ERROR: "+ error.toString())
 			if(error instanceof TypeError){
 				const apiResponse = APIResponse.InvalidDateFormat()
 				res.status(apiResponse.code).send(apiResponse.toJson())
