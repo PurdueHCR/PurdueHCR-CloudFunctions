@@ -20,6 +20,12 @@ export declare type SystemPreferenceOptions = {
     suggested_point_ids?: string
 };
 
+export declare type HouseOptions = {
+    color?: string
+    num_residents?: number
+    total_points?: number
+}
+
 export class FirestoreDataFactory{
 
     static systemPreference(db:firebase.firestore.Firestore, spOpts?:SystemPreferenceOptions): Promise<void>{
@@ -43,6 +49,14 @@ export class FirestoreDataFactory{
             "PermissionLevel":(ptopts && ptopts.permission_level)? ptopts!.permission_level : 2,
             "ResidentsCanSubmit": (ptopts && ptopts.residents_can_submit !== undefined)? ptopts!.residents_can_submit : true,
             "Value": (ptopts && ptopts.value)? ptopts!.value : 1
+        })
+    }
+
+    static createHouse(db: firebase.firestore.Firestore, id: string, hOpts?:HouseOptions): Promise<void> {
+        return db.collection("House").doc(id).set({
+            "Color":(hOpts && hOpts.color)? hOpts!.color: "#5AC0C7",
+            "NumberOfResidents":(hOpts && hOpts.num_residents)? hOpts.num_residents: 200,
+            "TotalPoints":(hOpts && hOpts.total_points)? hOpts.total_points: 20
         })
     }
 }

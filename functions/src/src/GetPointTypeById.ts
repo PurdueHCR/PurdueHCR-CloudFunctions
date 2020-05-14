@@ -10,7 +10,7 @@ import { APIResponse } from "../models/APIResponse"
  */
 export async function getPointTypeById(id: number) : Promise<PointType> {
 	try {
-        const db = admin.firestore()
+		const db = admin.firestore()
 		const pointTypeDocument = await db.collection(HouseCompetition.POINT_TYPES_KEY).doc(id.toString()).get()
 		if(!pointTypeDocument.exists){
 			return Promise.reject(APIResponse.UnknownPointType())
@@ -20,8 +20,14 @@ export async function getPointTypeById(id: number) : Promise<PointType> {
 			return Promise.resolve(pointType)
 		}
 	}
-	catch (err) {
-		console.log("GET Point type Error: " + err)
+	catch (error) {
+		if (error instanceof APIResponse) {
+			return Promise.reject(error)
+		}
+		else {
+			console.error("GET Point type BY IDError: " + error)
 		return Promise.reject(APIResponse.ServerError())
+		}
+		
 	}
 }

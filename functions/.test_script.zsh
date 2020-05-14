@@ -42,10 +42,10 @@ fi
 
 echo "Starting Tests"
 if [ $SILENT -eq 1 ]; then
-  jest --config ./jest.config.js "$TESTING" --detectOpenHandles --forceExit --silent
+  jest --config ./jest.config.js "$TESTING" --silent
 else
   echo "Verbose mode"
-  jest --config ./jest.config.js "$TESTING" --detectOpenHandles --forceExit
+  jest --config ./jest.config.js "$TESTING" 
 fi
 
 if [ $LAUNCH_DATABASE -eq 1 ]; then

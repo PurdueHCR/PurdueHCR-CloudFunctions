@@ -20,6 +20,7 @@ export async function getUser(id: string) : Promise<User> {
 		}
 		else {
 			const user = User.fromDocumentSnapshot(userDocument)
+			user.id = id
 			return Promise.resolve(user)
 		}
 	}
