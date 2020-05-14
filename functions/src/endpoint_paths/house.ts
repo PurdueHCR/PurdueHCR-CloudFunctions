@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as express from 'express'
-import * as bodyParser from "body-parser"
 
 
 if(admin.apps.length === 0){
@@ -13,8 +12,8 @@ const cors = require('cors')
 const houses_main = express()
 
 houses_main.use(houses_app)
-houses_main.use(bodyParser.json())
-houses_main.use(bodyParser.urlencoded({ extended: false }))
+houses_app.use(express.json())
+houses_app.use(express.urlencoded({ extended: false }))
 
 const firestoreTools = require('../firestoreTools')
 

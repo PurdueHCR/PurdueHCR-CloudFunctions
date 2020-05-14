@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
-import * as bodyParser from "body-parser";
 import {User} from "../models/User";
 import { HouseCompetition } from '../models/HouseCompetition';
 import { House } from '../models/House';
@@ -23,8 +22,8 @@ const admin_main = express();
 const firestoreTools = require('../firestoreTools');
 
 admin_main.use(admin_app);
-admin_main.use(bodyParser.json());
-admin_main.use(bodyParser.urlencoded({ extended: false }));
+admin_app.use(express.json());
+admin_app.use(express.urlencoded({ extended: false }));
 
 
 

@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as express from 'express'
-import * as bodyParser from "body-parser"
 import { getUser } from '../src/GetUser'
 import { APIResponse } from '../models/APIResponse'
 import { getUserPointTypes } from '../src/getUserPointTypes'
@@ -21,8 +20,8 @@ const pt_main = express()
 const firestoreTools = require('../firestoreTools')
 
 pt_main.use(pt_app)
-pt_main.use(bodyParser.json())
-pt_main.use(bodyParser.urlencoded({ extended: false }))
+pt_app.use(express.json())
+pt_app.use(express.urlencoded({ extended: false }))
 
 
 
@@ -81,14 +80,13 @@ pt_app.put('/update', async (req, res) => {
 		const error = APIResponse.MissingRequiredParameters()
 		res.status(error.code).send(error.toJson())
 	}
-	else if ((await getUser(req["user"]["uid"])).permissionLevel != UserPermissionLevel.PROFESSIONAL_STAFF) {
-		console.log((await getUser(req["user"]["uid"])).permissionLevel)
+	else if ((await getUser(req["user"]["uid"])).permissionLevel !== UserPermissionLevel.PROFESSIONAL_STAFF) {
 		const error = APIResponse.InvalidPermissionLevel()
 		res.status(error.code).send(error.toJson())
 	}
 	else {
 		let matches = false;
-		for (let item in req.body) {
+		for (const item in req.body) {
 			// Check that the values attempting to be updated confirm to the allowed values
 			const options = [PointType.DESCRIPTION, PointType.ENABLED, PointType.NAME,
 			  				 PointType.PERMISSION_LEVEL, PointType.RESIDENTS_CAN_SUBMIT, PointType.VALUE]

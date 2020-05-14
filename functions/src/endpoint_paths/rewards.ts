@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as express from 'express'
-import * as bodyParser from "body-parser"
 import { APIResponse } from '../models/APIResponse'
 import { getAllRewards } from '../src/GetAllRewards'
 import { getRewardById } from '../src/GetRewardById'
@@ -16,8 +15,8 @@ const reward_main = express()
 const firestoreTools = require('../firestoreTools')
 
 reward_main.use(reward_app)
-reward_main.use(bodyParser.json())
-reward_main.use(bodyParser.urlencoded({ extended: false }))
+reward_app.use(express.json())
+reward_app.use(express.urlencoded({ extended: false }))
 
 
 

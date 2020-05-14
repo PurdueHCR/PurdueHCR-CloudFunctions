@@ -1,8 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
-import * as bodyParser from "body-parser";
-//import { HouseCompetition } from './models/HouseCompetition';
 import {Link} from '../models/Link';
 import { HouseCompetition } from '../models/HouseCompetition';
 import { PointType } from '../models/PointType';
@@ -18,8 +16,8 @@ const cors = require('cors');
 const links_main = express();
 
 links_main.use(links_app);
-links_main.use(bodyParser.json());
-links_main.use(bodyParser.urlencoded({ extended: false }));
+links_app.use(express.json());
+links_app.use(express.urlencoded({ extended: false }));
 
 const firestoreTools = require('../firestoreTools');
 
