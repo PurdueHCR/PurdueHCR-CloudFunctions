@@ -15,11 +15,15 @@ export async function getPointLogsForUser(userID: string, house: string, limit: 
     try {
         const db = admin.firestore()
         let reference = db.collection(HouseCompetition.HOUSE_KEY).doc(house).collection(HouseCompetition.HOUSE_COLLECTION_POINTS_KEY).where(PointLog.RESIDENT_ID, '==', userID)
-        if(limit > 0){
-            reference = reference.limit(limit)
-        }
         const pointLogQuerySnapshot = await reference.get()
-        return Promise.resolve(PointLog.fromQuerySnapshot(pointLogQuerySnapshot))
+        let logs = PointLog.fromQuerySnapshot(pointLogQuerySnapshot)
+        logs.sort((a:PointLog, b:PointLog) => {
+            return (b.dateOccurred < a.dateOccurred)? -1: 1
+        })
+        if(limit > 0){
+            logs = logs.slice(0,limit)
+        }
+        return Promise.resolve(logs)
     }
     catch (err) {
         console.error("GET PointLogs error: " + err)

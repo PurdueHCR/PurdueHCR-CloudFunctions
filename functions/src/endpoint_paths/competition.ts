@@ -9,14 +9,8 @@ import { PointLog } from '../models/PointLog'
 import { UserPointsFromDate } from './administration'
 import { House } from '../models/House'
 import { User } from '../models/User'
-import { getRank } from '../src/GetUserRank'
 import { APIResponse } from '../models/APIResponse'
-import { getUser } from '../src/GetUser'
-import { getNextRewardForHouse } from '../src/GetReward'
-import { getPointLogsForUser } from '../src/GetPointLogsForUser'
-import { getAllHouses } from '../src/GetHouses'
-import { UserPermissionLevel } from '../models/UserPermissionLevel'
-import { getSystemPreferences } from '../src/GetSystemPreferences'
+import { getResidentProfile } from '../src/GetUserProfiles'
 
 
 class UsersAndErrorWrapper{
@@ -282,39 +276,8 @@ comp_app.get('/getPointTypes', (req, res) => {
  */
 comp_app.get('/residentProfile', async (req, res) => {
 	try{
-		const user = await getUser(req["user"]["user_id"])
-		if(user.permissionLevel !== UserPermissionLevel.RESIDENT){
-			const apiResponse = APIResponse.InvalidPermissionLevel()
-			res.status(apiResponse.code).send(apiResponse.toJson())
-		}
-		else{
-			let data:any = {}
-			const systemPreferences = await getSystemPreferences()
-			if(systemPreferences.isCompetitionVisible){
-				
-				const houses = await getAllHouses()
-				let user_house: House = houses[0]
-				for(const house of houses){
-					if(house.id == user.house){
-						user_house = house
-						break
-					}
-				}
-				
-				data.user_rank = await getRank(user)
-				data.next_reward = await getNextRewardForHouse(user_house)
-				data.houses = houses
-			}
-			else{
-				data.user_rank = {}
-				data.next_reward = {}
-				data.houses = []
-			}
-
-			data.last_submissions = await getPointLogsForUser(user.id, user.house, 5)
-
-			res.status(APIResponse.SUCCESS_CODE).send(data)
-		}
+		const resident_profile = await getResidentProfile(req["user"]["user_id"])
+		res.status(APIResponse.SUCCESS_CODE).send(resident_profile)
 	}
 	catch (error){
         if( error instanceof APIResponse){
