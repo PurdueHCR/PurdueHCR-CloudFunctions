@@ -4,16 +4,18 @@ import { APIResponse } from "../models/APIResponse"
 import { House } from '../models/House'
 
 /**
- * Get a House from its Name
+ * Get all houses in order of ppr
  * 
- * @param name The name of the house to retrieve
  */
 export async function getAllHouses() : Promise<House[]> {
 	try {
         const db = admin.firestore()
 		const houseQuerySnapshot = await db.collection(HouseCompetition.HOUSE_KEY).get()
-		const house = House.fromQuerySnapshot(houseQuerySnapshot);
-			return Promise.resolve(house)
+		const houses = House.fromQuerySnapshot(houseQuerySnapshot);
+		houses.sort((a:House, b:House) => {
+			return b.pointsPerResident-a.pointsPerResident
+		})
+		return Promise.resolve(houses)
 	}
 	catch (err) {
 		console.log("GET All Houses Error: " + err)

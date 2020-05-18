@@ -55,7 +55,7 @@ export async function getNextRewardForHouse(house: House): Promise<Reward> {
 	const rewards = await getAllRewards()
 	let nextReward = rewards[rewards.length - 1]
 	for(const reward of rewards){
-		if(reward.requiredPPR > house.getPointsPerResident()){
+		if(reward.requiredPPR > house.pointsPerResident){
 			nextReward = reward
 			break
 		}

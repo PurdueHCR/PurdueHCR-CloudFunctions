@@ -19,10 +19,7 @@ export class House {
         this.totalPoints = totalPoints
         this.id = id
         this.pointsPerResident = totalPoints/numberOfResidents
-    }
-
-    getPointsPerResident(): number{
-        return this.totalPoints / this.numberOfResidents
+        console.log("PPR:",this.pointsPerResident, "totalPoints:",this.totalPoints,"Num Res:",this.numberOfResidents)
     }
 
     static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): House{

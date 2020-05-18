@@ -41,8 +41,6 @@ export async function getRank(user:User): Promise<UserRank> {
         }
     }
 
-    console.log(JSON.stringify(houseResidents))
-
     houseResidents.sort((a:User, b:User) => {
         return b.totalPoints - a.totalPoints
     })

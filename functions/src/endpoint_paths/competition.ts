@@ -15,6 +15,8 @@ import { getUser } from '../src/GetUser'
 import { getNextRewardForHouse } from '../src/GetReward'
 import { getPointLogsForUser } from '../src/GetPointLogsForUser'
 import { getAllHouses } from '../src/GetHouses'
+import { UserPermissionLevel } from '../models/UserPermissionLevel'
+import { getSystemPreferences } from '../src/GetSystemPreferences'
 
 
 class UsersAndErrorWrapper{
@@ -281,26 +283,38 @@ comp_app.get('/getPointTypes', (req, res) => {
 comp_app.get('/residentProfile', async (req, res) => {
 	try{
 		const user = await getUser(req["user"]["user_id"])
-		const rank = await getRank(user)
-		const houses = await getAllHouses()
-		console.log(JSON.stringify(houses))
-		let user_house: House = houses[0]
-		for(const house of houses){
-			if(house.id == user.house){
-				user_house = house
-				break
+		if(user.permissionLevel !== UserPermissionLevel.RESIDENT){
+			const apiResponse = APIResponse.InvalidPermissionLevel()
+			res.status(apiResponse.code).send(apiResponse.toJson())
+		}
+		else{
+			let data:any = {}
+			const systemPreferences = await getSystemPreferences()
+			if(systemPreferences.isCompetitionVisible){
+				
+				const houses = await getAllHouses()
+				let user_house: House = houses[0]
+				for(const house of houses){
+					if(house.id == user.house){
+						user_house = house
+						break
+					}
+				}
+				
+				data.user_rank = await getRank(user)
+				data.next_reward = await getNextRewardForHouse(user_house)
+				data.houses = houses
 			}
+			else{
+				data.user_rank = {}
+				data.next_reward = {}
+				data.houses = []
+			}
+
+			data.last_submissions = await getPointLogsForUser(user.id, user.house, 5)
+
+			res.status(APIResponse.SUCCESS_CODE).send(data)
 		}
-		console.log(JSON.stringify(user_house))
-		const next_reward = await getNextRewardForHouse(user_house)
-		const last_submissions = await getPointLogsForUser(user.id, user_house.id, 5)
-		const data = {
-			"user_rank": rank.toJson(),
-			"houses": houses,
-			"next_reward": next_reward,
-			"last_submissions": last_submissions
-		}
-		res.status(APIResponse.SUCCESS_CODE).send(data)
 	}
 	catch (error){
         if( error instanceof APIResponse){
@@ -311,7 +325,7 @@ comp_app.get('/residentProfile', async (req, res) => {
             const apiResponse = APIResponse.ServerError()
             res.status(apiResponse.code).send(apiResponse.toJson())
         }
-    }
+	}
 })
 
 /**

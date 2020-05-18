@@ -151,5 +151,9 @@ describe('getAllHouses', () =>{
         let rewards = await GetHouses.getAllHouses();
         //Keys need to match the keys listed in the api documentation
         expect(rewards).toHaveLength(3)
+        //Yes. I am biased. Platinum must always be in first place. I am declaring this as a coding standard for this repository.
+        expect(rewards[0].id).toBe(Platinum.id)
+        expect(rewards[1].id).toBe(Palladium.id)
+        expect(rewards[2].id).toBe(Copper.id)
     })
 })
