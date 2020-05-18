@@ -9,6 +9,12 @@ import { PointLog } from '../models/PointLog'
 import { UserPointsFromDate } from './administration'
 import { House } from '../models/House'
 import { User } from '../models/User'
+import { getRank } from '../src/GetUserRank'
+import { APIResponse } from '../models/APIResponse'
+import { getUser } from '../src/GetUser'
+import { getNextRewardForHouse } from '../src/GetReward'
+import { getPointLogsForUser } from '../src/GetPointLogsForUser'
+import { getAllHouses } from '../src/GetHouses'
 
 
 class UsersAndErrorWrapper{
@@ -272,15 +278,40 @@ comp_app.get('/getPointTypes', (req, res) => {
 /**
  * Return the system preferences
  */
-comp_app.get('/getSystemPreferences', (req, res) => {
-	//TODO 
-	/*
-		2. Get the system preferences from the database
-		3. Cast the returned document into a System Preference Model
-		4. Send the json version of the model in the response
-		5. return 400 error if could not find the system preferences
-		6. Return 500 error if firebase error
-	*/
+comp_app.get('/residentProfile', async (req, res) => {
+	try{
+		const user = await getUser(req["user"]["user_id"])
+		const rank = await getRank(user)
+		const houses = await getAllHouses()
+		console.log(JSON.stringify(houses))
+		let user_house: House = houses[0]
+		for(const house of houses){
+			if(house.id == user.house){
+				user_house = house
+				break
+			}
+		}
+		console.log(JSON.stringify(user_house))
+		const next_reward = await getNextRewardForHouse(user_house)
+		const last_submissions = await getPointLogsForUser(user.id, user_house.id, 5)
+		const data = {
+			"user_rank": rank.toJson(),
+			"houses": houses,
+			"next_reward": next_reward,
+			"last_submissions": last_submissions
+		}
+		res.status(APIResponse.SUCCESS_CODE).send(data)
+	}
+	catch (error){
+        if( error instanceof APIResponse){
+            res.status(error.code).send(error.toJson())
+        }
+        else {
+            console.log("Unknown Error: "+error.toString())
+            const apiResponse = APIResponse.ServerError()
+            res.status(apiResponse.code).send(apiResponse.toJson())
+        }
+    }
 })
 
 /**

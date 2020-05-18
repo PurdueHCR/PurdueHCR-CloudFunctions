@@ -8,6 +8,24 @@ import { House } from '../models/House'
  * 
  * @param name The name of the house to retrieve
  */
+export async function getAllHouses() : Promise<House[]> {
+	try {
+        const db = admin.firestore()
+		const houseQuerySnapshot = await db.collection(HouseCompetition.HOUSE_KEY).get()
+		const house = House.fromQuerySnapshot(houseQuerySnapshot);
+			return Promise.resolve(house)
+	}
+	catch (err) {
+		console.log("GET All Houses Error: " + err)
+		return Promise.reject(APIResponse.ServerError())
+	}
+}
+
+/**
+ * Get a House from its Name
+ * 
+ * @param name The name of the house to retrieve
+ */
 export async function getHouseByName(name: string) : Promise<House> {
 	try {
         const db = admin.firestore()
@@ -21,7 +39,7 @@ export async function getHouseByName(name: string) : Promise<House> {
 		}
 	}
 	catch (err) {
-		console.log("GET Point type Error: " + err)
+		console.log("GET House by name Error: " + err)
 		return Promise.reject(APIResponse.ServerError())
 	}
 }
