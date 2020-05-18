@@ -19,7 +19,15 @@ export class House {
         this.totalPoints = totalPoints
         this.id = id
         this.pointsPerResident = totalPoints/numberOfResidents
-        console.log("PPR:",this.pointsPerResident, "totalPoints:",this.totalPoints,"Num Res:",this.numberOfResidents)
+    }
+
+    /**
+     * get the minimaly sized JSON object required to update the total points in the database
+     */
+    toPointUpdateJson() {
+        const data = {}
+        data[House.TOTAL_POINTS] = this.totalPoints
+        return data
     }
 
     static fromDocumentSnapshot(document: FirebaseFirestore.DocumentSnapshot): House{
@@ -61,12 +69,6 @@ export class House {
             totalPoints = -1;
         }
         return new House(color, numberOfResidents, totalPoints, id)
-    }
-
-    toPointUpdateJson() {
-        const data = {}
-        data[House.TOTAL_POINTS] = this.totalPoints
-        return data
     }
 }
 

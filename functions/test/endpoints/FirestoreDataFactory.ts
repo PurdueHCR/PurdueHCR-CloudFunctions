@@ -143,6 +143,14 @@ export class FirestoreDataFactory{
         }
     }
     
+    /**
+     * Create or update a pointlog
+     * @param db - Test App Firestore instance (Usually from authedApp())
+     * @param house - name of the house to add point log for
+     * @param resident_id - id of resident to add point log for
+     * @param approved - boolean for if the pointlog was already approved. (used to set the approved fields and sign of point type ID)
+     * @param ptOpts - Optional parameters to modifu the point log
+     */
     static setPointLog(db: firebase.firestore.Firestore, house:string, resident_id:string, approved: boolean, ptOpts:PointLogOptions = POINT_LOG_DEFAULTS): Promise<firebase.firestore.DocumentReference| void>{
         let data = {
             "DateOccurred":(ptOpts.date_occurred !== undefined)?ptOpts.date_occurred:POINT_LOG_DEFAULTS.date_occurred,
@@ -170,12 +178,24 @@ export class FirestoreDataFactory{
         
     }
 
+    /**
+     * Create multiple pointlogs for the given user
+     * @param db  - Test App Firestore instance (Usually from authedApp())
+     * @param house - ID of house to make point logs for
+     * @param resident_id - id of resident to make point logs for
+     * @param count - number of point logs to create
+     */
     static async createMultiplePointLogs(db: firebase.firestore.Firestore, house:string, resident_id:string, count:number){
         for(let i = 0; i < count; i++){
             await this.setPointLog(db, house, resident_id, true)
         }
     }
 
+    /**
+     * Create or update a reward
+     * @param db  - Test App Firestore instance (Usually from authedApp())
+     * @param rOpts - Optional parameters for the Reward
+     */
     static setReward(db: firebase.firestore.Firestore, rOpts:RewardOptions = REWARD_DEFAULTS): Promise<void> {
         return db.collection("Rewards").doc((rOpts.id)?rOpts.id:REWARD_DEFAULTS.id).set({
             FileName:(rOpts.id !== undefined)?rOpts.id+".png":REWARD_DEFAULTS.id+".png",
@@ -186,7 +206,7 @@ export class FirestoreDataFactory{
 }
 
 /**
- * Type declaration for optional params for System Preference
+ * Type declaration for optional params for System Preference. Undefined fields will be defaulted.
  */
 export declare type SystemPreferenceOptions = {
     android_version?: string
@@ -200,7 +220,7 @@ export declare type SystemPreferenceOptions = {
 };
 
 /**
- * Type declaration for optional params for point type
+ * Type declaration for optional params for point type. Undefined fields will be defaulted.
  */
 export declare type PointTypeOptions = {
     description?: string
@@ -212,7 +232,7 @@ export declare type PointTypeOptions = {
 };
 
 /**
- * Type declaration for optional params for House Options
+ * Type declaration for optional params for House Options. Undefined fields will be defaulted.
  */
 export declare type HouseOptions = {
     color?: string
@@ -220,6 +240,9 @@ export declare type HouseOptions = {
     total_points?: number
 }
 
+/**
+ * Type declaration to add parameters for multiple houses at once. Undefined fields will be defaulted.
+ */
 export declare type AllHousesOptions = {
     copper?: HouseOptions,
     palladium?:HouseOptions,
@@ -229,7 +252,7 @@ export declare type AllHousesOptions = {
 }
 
 /**
- * Type declaration for optional params for User Options
+ * Type declaration for optional params for User Options. Undefined fields will be defaulted.
  */
 export declare type UserOptions = {
     first?:string, 
@@ -240,6 +263,9 @@ export declare type UserOptions = {
     total_points?:number
 }
 
+/**
+ * Type declaration for fields to add to a point log. Undefined fields will be defaulted.
+ */
 export declare type PointLogOptions = {
     id?:string,
     approved_by?:string,
@@ -256,18 +282,27 @@ export declare type PointLogOptions = {
 
 }
 
+/**
+ * Type declaration for fields to add to reward. Undefined fields will be defaulted.
+ */
 export declare type RewardOptions = {
     id?: string
     required_ppr?: number,
     required_value?: number
 }
 
+/**
+ * Default fields for Reward
+ */
 export const REWARD_DEFAULTS:RewardOptions = {
     id: "Pizza Party",
     required_ppr: 100,
     required_value: 20000
 }
 
+/**
+ * Default fields for point log
+ */
 export const POINT_LOG_DEFAULTS:PointLogOptions = {
     approved_by: "Preapproved",
     approved_on: new Date(Date.parse("5/18/2020")),
@@ -283,7 +318,9 @@ export const POINT_LOG_DEFAULTS:PointLogOptions = {
 
 }
 
-//Default values for System Preferences. Exported so it can be used in tests
+/**
+ * Default fields for system preferences
+ */
 export const SYSTEM_PREFERENCES_DEFAULTS:SystemPreferenceOptions = {
     android_version: "2.0.0",
     one_time_code: "abc",
@@ -295,6 +332,9 @@ export const SYSTEM_PREFERENCES_DEFAULTS:SystemPreferenceOptions = {
     suggested_point_ids: "1,2,3,4",
 }
 
+/**
+ * default fields for point type
+ */
 export const POINT_TYPE_DEFAULTS:PointTypeOptions = {
     description: "Empty Point Type Description",
     name: "Empty Point Type Name",
@@ -304,12 +344,18 @@ export const POINT_TYPE_DEFAULTS:PointTypeOptions = {
     value: 1
 }
 
+/**
+ * Default field for house
+ */
 export const HOUSE_DEFAULTS:HouseOptions = {
     color: "#5AC0C7",
     total_points: 20,
     num_residents: 200
 }
 
+/**
+ * Default fields for user
+ */
 export const USER_DEFAULTS:UserOptions = {
     first: "TEST_FIRST",
     last: "TEST_LAST",

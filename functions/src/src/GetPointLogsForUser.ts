@@ -3,15 +3,14 @@ import { APIResponse } from "../models/APIResponse"
 import { PointLog } from '../models/PointLog'
 import { HouseCompetition } from "../models/HouseCompetition"
 
-/**
- * Get PointLogs for a user from their id
- * 
- * @param userID The id of the user whose PointLogs we want to retrieve
- * 
- * @throws
- * 
- */
 
+/**
+ * Get point logs belonging to the user orderd by the date they were submitted
+ * @param userID - Id of user to get point logs for
+ * @param house - name of house that user belongs to
+ * @param limit - Optional number of point logs to retrieve
+ * @throws 500 - ServerError
+ */
 export async function getPointLogsForUser(userID: string, house: string, limit: number = -1) : Promise<PointLog[]> {
     try {
         const db = admin.firestore()

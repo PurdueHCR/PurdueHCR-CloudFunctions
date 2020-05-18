@@ -50,6 +50,7 @@ export async function getAllRewards() : Promise<Reward[]> {
 /**
  * Get the next reward for the given house. Will return the highest reward if there is none
  * @param house House to get next reward for
+ * @throws 500 - ServerError
  */
 export async function getNextRewardForHouse(house: House): Promise<Reward> {
 	const rewards = await getAllRewards()

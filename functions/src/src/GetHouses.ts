@@ -5,7 +5,7 @@ import { House } from '../models/House'
 
 /**
  * Get all houses in order of ppr
- * 
+ * @throws 500 - ServerError
  */
 export async function getAllHouses() : Promise<House[]> {
 	try {
@@ -27,6 +27,8 @@ export async function getAllHouses() : Promise<House[]> {
  * Get a House from its Name
  * 
  * @param name The name of the house to retrieve
+ * @throws 425 - UnknownHouse
+ * @throws 500 - ServerError
  */
 export async function getHouseByName(name: string) : Promise<House> {
 	try {

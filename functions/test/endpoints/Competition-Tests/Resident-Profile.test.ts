@@ -31,17 +31,20 @@ describe('GET competition/residentProfile', () =>{
         //Get the User function from the index to test
         competition_func = require('../../../src/endpoint_paths/index.ts').competition
 
-        //Create sample data for the tests
+        //Create 6 sample residents
         await FirestoreDataFactory.setUser(db, RESIDENT_ID, 0, {total_points: 0, semester_points: 0})
         for(let i =0; i < 5; i++){
             await FirestoreDataFactory.setUser(db, RESIDENT_ID+" "+i.toString(), 0, {total_points: (i+1)*10, semester_points: (i+1)*10})
         }
 
+        //Create Other permission level users
         await FirestoreDataFactory.setUser(db, RHP_ID, 1)
         await FirestoreDataFactory.setUser(db, REC_ID, 2)
         await FirestoreDataFactory.setUser(db, FHP, 3)
         await FirestoreDataFactory.setUser(db, PRIV_RES, 4, {house_name:"Silver"})
         await FirestoreDataFactory.setUser(db, NHAS, 5)
+
+        //Create houses
         await FirestoreDataFactory.setAllHouses(db,
             {
                 copper:{total_points:0, num_residents: 200}, 
@@ -51,7 +54,10 @@ describe('GET competition/residentProfile', () =>{
                 titanium:{total_points:1600, num_residents: 200}
             }
         )
+        //Create pointlogs for a user
         await FirestoreDataFactory.createMultiplePointLogs(db,"Platinum",RESIDENT_ID,10)
+
+        //Create sample rewards
         await FirestoreDataFactory.setReward(db, {id:"T-Shirts", required_ppr: 5}) // Tshirts reard 5 ppr
         await FirestoreDataFactory.setReward(db)// Default Reward 100 ppr
     })
