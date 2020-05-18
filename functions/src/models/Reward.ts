@@ -44,5 +44,4 @@ export class Reward {
         return new Reward(id, fileName, requiredPPR, requiredValue)
     }
 
-
 }
